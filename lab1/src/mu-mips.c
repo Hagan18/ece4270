@@ -447,3 +447,24 @@ int main(int argc, char *argv[]) {
 	}
 	return 0;
 }
+
+/**************************************************
+ * if the flag is set, the instruction is 'left'
+ *************************************************/
+void convertInstruction(uint32_t value, int* flag){
+	uint32_t right = value << 26;
+	right = right >> 26;
+	
+	if (right & 0xFF != 0){
+		return right;
+	}
+	else if (left & 0xFF != 0){
+		*flag=1;
+		return left;
+	}
+	uint32_t left = value >> 24;
+	
+	printf("%08x\n",value);
+	printf("%08x\n", right);
+	printf("%08x\n", left);
+}
