@@ -336,7 +336,7 @@ void handle_instruction()
 	//printf("%u\n", (unsigned)currentMem);
 
 	uint32_t binInstruction = 0x22A8820, overflow;
-	long int rd, rt, rs;
+	long int rd, rt, rs, sa;
 	//case(instruction){//case statement for right
 		//ADD
 		//case 100000:
@@ -395,7 +395,7 @@ void handle_instruction()
 				printf("Subtraction Overflow\n");
 		//SUBU havent checked
 		//case 100011:
-			inInstruction = binInstruction >> 11;
+			binInstruction = binInstruction >> 11;
 			rd = binInstruction & 0x001F;
 			binInstruction = binInstruction >> 5;
 			rt = binInstruction & 0x01F;
@@ -409,9 +409,9 @@ void handle_instruction()
 			rt = binInstruction & 0x01F;
 			binInstruction = binInstruction >> 5;
 			rs = binInstruction & 0x1F;
-			temp = (int64_t)(~(rt+1) * ~(rs+1));//bitwise complement of each which is 1's complement add one for 2's complement and multiply
+			int64_t temp = (int64_t)(~(rt+1) * ~(rs+1));//bitwise complement of each which is 1's complement add one for 2's complement and multiply
 			//need to create temp variable somewhere (maybe a 64 bit signed?)
-			//low word gets stoer in LO high word gets stored in high
+			//low word gets stored in LO, high word gets stored in high
 	/*
 		If either of the two preceding instructions is MFHI or MFLO, the results of
 		these instructions are undefined. Correct operation requires separating
@@ -515,7 +515,7 @@ void handle_instruction()
 			rt = binInstruction & 0x01F;
 			binInstruction = binInstruction >> 5;
 			rs = binInstruction & 0x1F;
-			tempSLT = (int32_t)(rs-rt);//because they are to be treated as signed
+			int32_t tempSLT = (int32_t)(rs-rt);//because they are to be treated as signed
 			if(tempSLT < 0){
 				CURRENT_STATE.REGS[rd] = 1;
 			}
@@ -642,17 +642,18 @@ int main(int argc, char *argv[]) {
 uint32_t convertInstruction(uint32_t value, int* flag){
 	uint32_t right = value << 26;
 	right = right >> 26;
+	uint32_t left = value >> 24;
 	
-	if (right & 0xFF != 0){
+	if ((right & 0xFF) != 0){
 		return right;
 	}
-	else if (left & 0xFF != 0){
+	else if ((left & 0xFF) != 0){
 		*flag=1;
 		return left;
 	}
-	uint32_t left = value >> 24;
 	
-	printf("%08x\n",value);
-	printf("%08x\n", right);
-	printf("%08x\n", left);
+	//Debug
+	// printf("%08x\n",value);
+	// printf("%08x\n", right);
+	// printf("%08x\n", left);
 }
