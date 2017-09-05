@@ -451,7 +451,7 @@ int main(int argc, char *argv[]) {
 /**************************************************
  * if the flag is set, the instruction is 'left'
  *************************************************/
-void convertInstruction(uint32_t value, int* flag){
+uint32_t convertInstruction(uint32_t value, int* flag){
 	uint32_t right = value << 26;
 	right = right >> 26;
 	
