@@ -327,6 +327,84 @@ void handle_instruction()
 		//if(CURRENT_STATE.REGS[i] )
 	// }
 	printf("\nCurrent State: %016u\n", *CURRENT_STATE.REGS);
+	
+	/*IMPLEMENT THIS*/
+	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
+	printf("in handle instruction\n");
+	//uint32_t currentMem = mem_read_32(MEM_BEGIN);
+
+	//printf("%u\n", (unsigned)currentMem);
+
+	uint32_t binInstruction = 0x22A8820, overflow;
+	long int rd, rt, rs;
+	//case(instruction){//case statement for right
+		//ADD
+		//case 100000:
+			binInstruction = binInstruction >> 11;//define rd rt rs as ints?
+			printf("after first shift %u\n", binInstruction);
+			rd = binInstruction & 0x001F;
+			printf("rd after first and %ld\n", rd);
+			binInstruction = binInstruction >> 5;
+			rt = binInstruction & 0x01F;
+			printf("rt after first and %ld\n", rt);
+			binInstruction = binInstruction >> 5;
+			rs = binInstruction & 0x1F;
+			printf("rs after first and %ld\n", rs);
+			printf("after rs shift %u\n", binInstruction);
+			// check for overflow
+			overflow = binInstruction >> 9;
+			if ((overflow | 0x0) == 0){
+				CURRENT_STATE.REGS[rd] = rt + rs;
+				printf("%u\n", CURRENT_STATE.REGS[rd]);
+			}
+			else
+				printf("Addition Overflow\n");
+		//ADDU- no overflow can occur		
+		//case 100001:
+			binInstruction = binInstruction >> 11;
+			rd = binInstruction & 0x001F;
+			binInstruction = binInstruction >> 5;
+			rt = binInstruction & 0x01F;
+			binInstruction = binInstruction >> 5;
+			rs = binInstruction & 0x1F;
+			CURRENT_STATE.REGS[rd] = rt + rs;
+		//AND - havent checked
+		//case 100100:
+			binInstruction = binInstruction >> 11;
+			rd = binInstruction & 0x001F;
+			binInstruction = binInstruction >> 5;
+			rt = binInstruction & 0x01F;
+			binInstruction = binInstruction >> 5;
+			rs = binInstruction & 0x1F;
+			CURRENT_STATE.REGS[rd] = rs & rt;
+			printf("%u\n", CURRENT_STATE.REGS[rd]);
+		//SUB no check
+		//case 1000010: 
+			binInstruction = binInstruction >> 11;
+			rd = binInstruction & 0x001F;
+			binInstruction = binInstruction >> 5;
+			rt = binInstruction & 0x01F;
+			binInstruction = binInstruction >> 5;
+			rs = binInstruction & 0x1F;
+			overflow = binInstruction >> 9;
+			if ((overflow | 0x0) == 0){
+				CURRENT_STATE.REGS[rd] = rs-rt;
+				printf("%u\n", CURRENT_STATE.REGS[rd]);
+			}
+			else
+				printf("Subtraction Overflow\n");
+		//SUBU havent checked
+		//case 100011:
+			inInstruction = binInstruction >> 11;
+			rd = binInstruction & 0x001F;
+			binInstruction = binInstruction >> 5;
+			rt = binInstruction & 0x01F;
+			binInstruction = binInstruction >> 5;
+			rs = binInstruction & 0x1F;
+			CURRENT_STATE.REGS[rd] = rs-rt;
+			printf("%u\n", CURRENT_STATE.REGS[rd]);
+			
+			
 }
 
 
