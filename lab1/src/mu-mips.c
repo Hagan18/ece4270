@@ -150,7 +150,7 @@ void rdump() {
 /***************************************************************/
 /* Read a command from standard input.                                                               */  
 /***************************************************************/
-void handle_command() {                         
+void handle_command() {
 	char buffer[20];
 	uint32_t start, stop, cycles;
 	uint32_t register_no;
@@ -307,6 +307,26 @@ void handle_instruction()
 {
 	/*IMPLEMENT THIS*/
 	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
+
+	/****	Pseudo code		***/
+	//read the memory of the starting memory location
+
+	//shift the value of that value to figure out if its left or right & store in var
+
+	//if right, compare with the known right commands
+
+	//if left, compare with the known left commands
+
+	//call command when one matches.
+
+	int i = 0;
+	
+
+
+	// for (i; i< 6;i++){
+		//if(CURRENT_STATE.REGS[i] )
+	// }
+	printf("\nCurrent State: %016u\n", *CURRENT_STATE.REGS);
 }
 
 
