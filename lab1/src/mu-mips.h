@@ -78,3 +78,4 @@ void handle_instruction(); /*IMPLEMENT THIS*/
 void initialize();
 void print_program(); /*IMPLEMENT THIS*/
 uint32_t convertInstruction(uint32_t value, int* flag);
+long int signExtend(long int immediate);

@@ -624,8 +624,9 @@ void handle_instruction()
 				 * that ADDIU never causes an overflow exception.
 				*/
 
-				rs = (binInstruction >> 21) & 0x0000001F;
-				rt = rs + (binInstruction & 0x000FFFF);			//ADD//OR rt with the contents of 'immediate'
+				rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs
+				rt = signExtend((binInstruction & 0x000FFFF);	//isolate 'immediate' and sign extend it
+				rt = rs + rt;									//ADD rt with the contents of 'immediate'
 				binInstruction = binInstruction & 0xFE0FFFFF	//clear out the rt register
 				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
 
@@ -648,10 +649,50 @@ void handle_instruction()
 
 
 			case 001110: //XORI
+				/* The 16-bit immediate is zero-extended and combined with the contents of
+				 * general register rs in a bit-wise logical exclusive OR operation.
+				 * The result is placed into general register rt.
+				*/
+
+				rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs
+				rt = rs ^ (binInstruction & 0x000FFFF);			//XOR rt with the contents of 'immediate'
+				binInstruction = binInstruction & 0xFE0FFFFF	//clear out the rt register
+				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
 
 			case 001010: //SLTI
+				/* The 16-bit immediate is sign-extended and subtracted from the contents of
+				 * general register rs. Considering both quantities as signed integers, if rs is
+				 * less than the sign-extended immediate, the result is set to one; otherwise
+				 * the result is set to zero.
+				 * The result is placed into general register rt.
+				 * No integer overflow exception occurs under any circumstances. The
+				 * comparison is valid even if the subtraction used during the comparison overflows.
+				*/
+
+				rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs
+				rt = rs ^ (binInstruction & 0x000FFFF);			//isolate the contents of 'immediate'
+				rt = signExtend(rt);
+				if (rs < rt){
+					rt = rt & 0x0;
+					rt = rt | 0x00000001;
+				}
+				else {
+					rt = rt & 0x0;
+				}
+
+				binInstruction = binInstruction & 0xFE0FFFFF	//clear out the rt register
+				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
 
 			case 100011: //LW
+				/* The 16-bit offset is sign-extended and added to the contents of general
+				 * register base to form a virtual address. The contents of the word at the
+				 * memory location specified by the effective address are loaded into general
+				 * register rt. In 64-bit mode, the loaded word is sign-extended. If either of
+				 * the two least-significant bits of the effective address is non-zero, an
+				 * address error exception occurs.
+				*/
+
+
 
 			case 100000: //LB
 
@@ -745,4 +786,13 @@ uint32_t convertInstruction(uint32_t value, int* flag){
 	// printf("%08x\n",value);
 	// printf("%08x\n", right);
 	// printf("%08x\n", left);
+}
+
+long int signExtend(long int immediate){
+    long int val = (immediate & 0x0000FFFF);
+    long int mask = 0x00008000;
+    if (mask & val) {
+        val = val | 0xFFFF0000;
+    }
+    return val;
 }
