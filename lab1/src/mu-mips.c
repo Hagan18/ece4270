@@ -319,29 +319,23 @@ void handle_instruction()
 
 	//call command when one matches.
 
-	int i = 0;
-	
-
-
-	// for (i; i< 6;i++){
-		//if(CURRENT_STATE.REGS[i] )
-	// }
-	printf("\nCurrent State: %016u\n", *CURRENT_STATE.REGS);
-	
 	/*IMPLEMENT THIS*/
 	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
 	printf("in handle instruction\n");
-	//uint32_t currentMem = mem_read_32(MEM_BEGIN);
+	
+	uint32_t binInstruction , overflow;
+	long int instruction;
+	long int rd, rt, rs, sa;//not sure what type this is
+	instruction = convertInstruction(mem_read_32(CURRENT_STATE.PC), flag);//does convertInstruction give the opcode?
+	binInstruction = mem_read_32(CURRENT_STATE.PC);
+	//printf("0x%08x\n",mem_read_32(CURRENT_STATE.PC));
+	
 
-	//printf("%u\n", (unsigned)currentMem);
-
-	uint32_t binInstruction = 0x22A8820, overflow;
-	long int rd, rt, rs, sa;
-	binInstruction = convertInstruction(mem_read_32(CURRENT_STATE.PC,flag));
-	if(*flag){ //If flag is set = instruction is 'left'
-		//switch(binInstruction){//case statement for right
+	if(flag){ //If flag is set = instruction is 'left'
+		printf("inside if\n");
+		switch(instruction){//case statement for right
 			//ADD
-			//case 100000:
+			case 100000:
 				binInstruction = binInstruction >> 11;//define rd rt rs as ints?
 				printf("after first shift %u\n", binInstruction);
 				rd = binInstruction & 0x001F;
@@ -356,32 +350,35 @@ void handle_instruction()
 				// check for overflow
 				overflow = binInstruction >> 9;
 				if ((overflow | 0x0) == 0){
-					CURRENT_STATE.REGS[rd] = rt + rs;
-					printf("%u\n", CURRENT_STATE.REGS[rd]);
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] + CURRENT_STATE.REGS[rs];
+					printf("%u\n", NEXT_STATE.REGS[rd]);
 				}
 				else
 					printf("Addition Overflow\n");
-			//ADDU- no overflow can occur		
-			//case 100001:
+				break;
+			//ADDU		
+			case 100001:
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
 				rt = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
-				CURRENT_STATE.REGS[rd] = rt + rs;
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] + CURRENT_STATE.REGS[rs];
+				break;
 			//AND - havent checked
-			//case 100100:
+			case 100100:
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
 				rt = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
-				CURRENT_STATE.REGS[rd] = rs & rt;
-				printf("%u\n", CURRENT_STATE.REGS[rd]);
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
+				printf("%u\n", NEXT_STATE.REGS[rd]);
+				break;
 			//SUB no check
-			//case 1000010: 
+			case 1000010: 
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
@@ -390,28 +387,30 @@ void handle_instruction()
 				rs = binInstruction & 0x1F;
 				overflow = binInstruction >> 9;
 				if ((overflow | 0x0) == 0){
-					CURRENT_STATE.REGS[rd] = rs-rt;
-					printf("%u\n", CURRENT_STATE.REGS[rd]);
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs]-CURRENT_STATE.REGS[rt];
+					printf("%u\n", NEXT_STATE.REGS[rd]);
 				}
 				else
 					printf("Subtraction Overflow\n");
+				break;
 			//SUBU havent checked
-			//case 100011:
+			case 100011:
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
 				rt = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
-				CURRENT_STATE.REGS[rd] = rs-rt;
-				printf("%u\n", CURRENT_STATE.REGS[rd]);
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs]-CURRENT_STATE.REGS[rt];
+				printf("%u\n", NEXT_STATE.REGS[rd]);
+				break;
 		//MULT not pretty sure this is wrong don't know where to store
-			//case 011000:
+			case 011000:
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
-				int64_t temp = (int64_t)(~(rt+1) * ~(rs+1));//bitwise complement of each which is 1's complement add one for 2's complement and multiply
+				int64_t temp = CURRENT_STATE.REGS[rt] * CURRENT_STATE.REGS[rs];//bitwise complement of each which is 1's complement add one for 2's complement and multiply
 				//need to create temp variable somewhere (maybe a 64 bit signed?)
 				//low word gets stored in LO, high word gets stored in high
 		/*
@@ -419,15 +418,16 @@ void handle_instruction()
 			these instructions are undefined. Correct operation requires separating
 			reads of HI or LO from writes by a minimum of two other instructions.
 		*/
-				CURRENT_STATE.LO = temp & 0xFFFFFFFF;//isolate the low 32 bits
-				CURRENT_STATE.HI = temp >> 32;//shift to get the high 32 bits
+				NEXT_STATE.LO = temp & 0xFFFFFFFF;//isolate the low 32 bits
+				NEXT_STATE.HI = temp >> 32;//shift to get the high 32 bits
+				break;
 			//MULTU needs work
-			//case 011001:
+			case 011001:
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
-				temp = (uint64_t)rt * rs;//takes the unsigned multiplication
+				temp = CURRENT_STATE.REGS[rt] * CURRENT_STATE.REGS[rs];//takes the unsigned multiplication
 				//need to create temp variable somewhere (maybe a 64 bit unsigned?)
 				//low word gets stoer in LO high word gets stored in high
 		/*
@@ -435,11 +435,11 @@ void handle_instruction()
 			these instructions are undefined. Correct operation requires separating
 			reads of HI or LO from writes by a minimum of two other instructions.
 		*/
-				CURRENT_STATE.LO = temp & 0xFFFFFFFF;//isolate the low 32 bits
-				CURRENT_STATE.HI = temp >> 32;//shift to get the high 32 bits
-				
+				NEXT_STATE.LO = temp & 0xFFFFFFFF;//isolate the low 32 bits
+				NEXT_STATE.HI = temp >> 32;//shift to get the high 32 bits
+				break;
 			//DIV needs work
-			//case 011010:
+			case 011010:
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x01F;
 				if (rt == 0){
@@ -448,18 +448,19 @@ void handle_instruction()
 				else{
 					binInstruction = binInstruction >> 5;
 					rs = binInstruction & 0x1F;
-					temp = (int32_t)(~(rs+1)/~(rt+1));//is that treating them as the 2's complement
-					CURRENT_STATE.LO = temp & 0xFFFFFFFF;//isolate the low 32 bits
-					CURRENT_STATE.HI = temp >> 32;//shift to get the high 32 bits
+					temp = CURRENT_STATE.REGS[rs]/CURRENT_STATE.REGS[rt];//is that treating them as the 2's complement
+					NEXT_STATE.LO = temp & 0xFFFFFFFF;//isolate the low 32 bits
+					NEXT_STATE.HI = temp >> 32;//shift to get the high 32 bits
 				}
 				/*
 					If either of the two preceding instructions is MFHI or MFLO, the results of
 					these instructions are undefined. Correct operation requires separating
 					reads of HI or LO from writes by a minimum of two other instructions.
 				*/
+				break;
 			
 			//DIVU needs work
-			//case 011011:
+			case 011011:
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x01F;
 				if (rt == 0){
@@ -468,134 +469,140 @@ void handle_instruction()
 				else{
 					binInstruction = binInstruction >> 5;
 					rs = binInstruction & 0x1F;
-					temp = rs/rt;//is that treating them as the 2's complement
-					CURRENT_STATE.LO = temp & 0xFFFFFFFF;//isolate the low 32 bits
-					CURRENT_STATE.HI = temp >> 32;//shift to get the high 32 bits
+					temp = CURRENT_STATE.REGS[rs]/CURRENT_STATE.REGS[rt];//is that treating them as the 2's complement
+					NEXT_STATE.LO = temp & 0xFFFFFFFF;//isolate the low 32 bits
+					NEXT_STATE.HI = temp >> 32;//shift to get the high 32 bits
 				}
 				/*
 					If either of the two preceding instructions is MFHI or MFLO, the results of
 					these instructions are undefined. Correct operation requires separating
 					reads of HI or LO from writes by a minimum of two other instructions.
 				*/
-			
+				break;
 			//OR
-			//case 100101:
+			case 100101:
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
 				rt = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
-				CURRENT_STATE.REGS[rd] = rs | rt;
-				printf("%u\n", CURRENT_STATE.REGS[rd]);
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt];
+				printf("%u\n", NEXT_STATE.REGS[rd]);
+				break;
 			
 			//NOR haven't checked
-			//case 100111:
+			case 100111:
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
 				rt = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
-				CURRENT_STATE.REGS[rd] = ~(rs | rt);
-				
+				NEXT_STATE.REGS[rd] = ~(CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt]);
+				break;
 			//XOR
-			//case 100110:
+			case 100110:
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
 				rt = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
-				CURRENT_STATE.REGS[rd] = (rs^rt);
-			
+				NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rs]^CURRENT_STATE.REGS[rt]);
+				break;
 			//SLT
-			//case 101010:
+			case 101010:
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
 				rt = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
-				int32_t tempSLT = (int32_t)(rs-rt);//because they are to be treated as signed
+				int32_t tempSLT = CURRENT_STATE.REGS[rs]-CURRENT_STATE.REGS[rt];//because they are to be treated as signed
 				if(tempSLT < 0){
-					CURRENT_STATE.REGS[rd] = 1;
+					NEXT_STATE.REGS[rd] = 1;
 				}
 				else{
-					CURRENT_STATE.REGS[rd] = 0;
+					NEXT_STATE.REGS[rd] = 0;
 				}
-			
+				break;
 			//SLL not checked
-			//case 00000:
+			case 00000:
 				binInstruction = binInstruction >> 6;
 				sa = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
 				rd = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 5;
 				rt = binInstruction & 0x1F;
-				CURRENT_STATE.REGS[rd] = rt << sa;
-				
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] << CURRENT_STATE.REGS[sa];
+				break;
 			//SRA not checked
-			//case 000011:
+			case 000011:
 				binInstruction = binInstruction >> 6;
 				sa = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
 				rd = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 5;
 				rt = binInstruction & 0x1F;
-				CURRENT_STATE.REGS[rd] = rt >> sa;
-				//HOW TO SIGN EXTEND IT
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> CURRENT_STATE.REGS[sa];
+				break;				
+			//HOW TO SIGN EXTEND IT
 			//MFLO not checked
-			//case 010010:
+			case 010010:
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x01F;
-				CURRENT_STATE.REGS[rd] = CURRENT_STATE.LO;
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.LO;
+				break;
 			//MFHI
-			//case 010000:
+			case 010000:
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x01F;
-				CURRENT_STATE.REGS[rd] = CURRENT_STATE.HI;
-				
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.HI;
+				break;
 			//MTHI
-			//case 010001:
+			case 010001:
 				binInstruction = binInstruction >> 21;
 				rs = binInstruction & 0x01F;
-				CURRENT_STATE.HI = CURRENT_STATE.REGS[rd];
-			
+				NEXT_STATE.HI = CURRENT_STATE.REGS[rd];
+				break;
 			//MTLO
-			//case 010011:
+			case 010011:
 				binInstruction = binInstruction >> 21;
 				rs = binInstruction & 0x01F;
-				CURRENT_STATE.LO = CURRENT_STATE.REGS[rd];
+				NEXT_STATE.LO = CURRENT_STATE.REGS[rd];
+				break;
 				
-			//JR- not thinking this is right
-			//case 001000:
+			//JR
+			case 001000:
 				binInstruction = binInstruction >> 21;
 				rs = binInstruction & 0x01F;
-				NEXT_STATE.PC = rs;//next state because it says to delay a clock cycle
-			
+				NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+				break;
 			//JALR
-			//case 001001:
+			case 001001:
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 10;
 				rs = binInstruction & 0x01F;
-				NEXT_STATE.PC = rs;
-				CURRENT_STATE.REGS[rd] = NEXT_STATE.PC + 1;
+				NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+				//CURRENT_STATE.REGS[rd] = NEXT_STATE.PC + 1;
 				/*
 					The program unconditionally jumps to the address contained in general
 					register rs, with a delay of one instruction. The address of the instruction
 					after the delay slot is placed in general registerrd. The default value of rd,
 					if omitted in the assembly language instruction, is 31.
 				*/
-				
+				break;
 
 			//SYSCALL
-			//case 001100:
+			case 001100:
 				reset();//what is supposed to happen on a syscall
-		//}
+				break;		
+		}
 	}
-	else if (!(*flag)){
+	else if (!(flag)){
+		printf("inside elseif\n");
 		switch(binInstruction){
 
 
@@ -610,7 +617,7 @@ void handle_instruction()
 
 				rs = (binInstruction >> 21) & 0x0000001F;
 				rt = rs + (binInstruction & 0x000FFFF);			//ADD rt with the contents of 'immediate'
-				binInstruction = binInstruction & 0xFE0FFFFF	//clear out the rt register
+				binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
 				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
 
 		// NOTE: Need to add overflow functionality!
@@ -625,9 +632,9 @@ void handle_instruction()
 				*/
 
 				rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs
-				rt = signExtend((binInstruction & 0x000FFFF);	//isolate 'immediate' and sign extend it
+				rt = signExtend((binInstruction & 0x000FFFF));	//isolate 'immediate' and sign extend it
 				rt = rs + rt;									//ADD rt with the contents of 'immediate'
-				binInstruction = binInstruction & 0xFE0FFFFF	//clear out the rt register
+				binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
 				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
 
 			case 001100: //ANDI
@@ -644,7 +651,7 @@ void handle_instruction()
 
 				rs = (binInstruction >> 21) & 0x0000001F;
 				rt = rs | (binInstruction & 0x000FFFF);			//OR rt with the contents of 'immediate'
-				binInstruction = binInstruction & 0xFE0FFFFF	//clear out the rt register
+				binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
 				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
 
 
@@ -656,7 +663,7 @@ void handle_instruction()
 
 				rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs
 				rt = rs ^ (binInstruction & 0x000FFFF);			//XOR rt with the contents of 'immediate'
-				binInstruction = binInstruction & 0xFE0FFFFF	//clear out the rt register
+				binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
 				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
 
 			case 001010: //SLTI
@@ -680,7 +687,7 @@ void handle_instruction()
 					rt = rt & 0x0;
 				}
 
-				binInstruction = binInstruction & 0xFE0FFFFF	//clear out the rt register
+				binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
 				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
 
 			case 100011: //LW
@@ -711,10 +718,12 @@ void handle_instruction()
 			case 000110: //BLEZ
 
 			case 000111: //BGTZ
+				
 
 			case 000010: //J
 
 			case 000011: //JAL
+				break;
 
 			/* Not included:
 			 * BLTZ
@@ -769,18 +778,21 @@ int main(int argc, char *argv[]) {
 /**************************************************
  * if the flag is set, the instruction is 'left'
  *************************************************/
-uint32_t convertInstruction(uint32_t value, int* flag){
+uint32_t convertInstruction(uint32_t value, int flag){
 	uint32_t right = value << 26;
 	right = right >> 26;
 	uint32_t left = value >> 24;
 	
 	if ((right & 0xFF) != 0){
+		flag = 0;		
 		return right;
 	}
 	else if ((left & 0xFF) != 0){
-		*flag=1;
+		flag=1;
 		return left;
 	}
+
+	return right;//not having a return was causing compile errors but it should never hit this
 	
 	//Debug
 	// printf("%08x\n",value);
@@ -796,3 +808,14 @@ long int signExtend(long int immediate){
     }
     return val;
 }
+/*uint32_t signExtend(uint32_t immediate){
+    uint32_t val = (immediate & 0x0000FFFF);
+   uint32_t mask = 0x00008000;
+    if (mask & val) {
+        val = val | 0xFFFF0000;
+    }
+    return val;
+}*/
+
+
+
