@@ -5,6 +5,7 @@
 #include <assert.h>
 
 #include "mu-mips.h"
+int flag = 0;
 
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
@@ -325,8 +326,8 @@ void handle_instruction()
 
 	
 	uint32_t binInstruction , overflow;
-	uint32_t instruction;
-	long int rd, rt, rs, sa, base;
+	uint32_t instruction, offset;
+	long int rd, rt, rs, sa, base, temp, target;
 	int jumpNum = 4;
 	instruction = convertInstruction(mem_read_32(CURRENT_STATE.PC), flag);//does convertInstruction give the opcode?
 	binInstruction = mem_read_32(CURRENT_STATE.PC);
@@ -629,6 +630,7 @@ void handle_instruction()
 	}
 	else if ((flag)){
 		printf("inside elseif\n");
+		long int immediate;
 		switch(binInstruction){
 
 
@@ -642,9 +644,11 @@ void handle_instruction()
 				*/
 
 				rs = (binInstruction >> 21) & 0x0000001F;
-				rt = rs + (binInstruction & 0x000FFFF);			//ADD rt with the contents of 'immediate'
-				binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
-				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
+				immediate = signExtend(binInstruction & 0x0000FFFF);
+				// rt = rs + (binInstruction & 0x000FFFF);			//ADD rt with the contents of 'immediate'
+				// binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
+				// binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
+				CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] + CURRENT_STATE.REGS[rs];
 
 		// NOTE: Need to add overflow functionality!
 
@@ -658,16 +662,21 @@ void handle_instruction()
 				*/
 
 				rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs
-				rt = signExtend((binInstruction & 0x000FFFF));	//isolate 'immediate' and sign extend it
-				rt = rs + rt;									//ADD rt with the contents of 'immediate'
-				binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
-				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
+				immediate = signExtend((binInstruction & 0x0000FFFF));	//isolate 'immediate' and sign extend it
+				// rt = rs + rt;									//ADD rt with the contents of 'immediate'
+				// binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
+				// binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
+				CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] + CURRENT_STATE.REGS[rs];
 
 			case 0xC: //ANDI
 				/*The 16-bit immediate is zero-extended and combined with the contents of
 			 	 * general registerrsin a bit-wise logical AND operation. The result is placed
 			 	 * into general register rt.
 			 	*/
+
+				rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs
+				immediate = binInstruction & 0x0000FFFF;
+				CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs];
 
 			case 0xD: //ORI
 				/* The 16-bit immediate is zero-extended and combined with the contents of
@@ -676,10 +685,8 @@ void handle_instruction()
 				*/
 
 				rs = (binInstruction >> 21) & 0x0000001F;
-				rt = rs | (binInstruction & 0x000FFFF);			//OR rt with the contents of 'immediate'
-				binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
-				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
-
+				immediate = binInstruction & 0x0000FFFF;
+				CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] | CURRENT_STATE.REGS[rs];
 
 			case 0xE: //XORI
 				/* The 16-bit immediate is zero-extended and combined with the contents of
@@ -688,9 +695,9 @@ void handle_instruction()
 				*/
 
 				rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs
-				rt = rs ^ (binInstruction & 0x000FFFF);			//XOR rt with the contents of 'immediate'
-				binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
-				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
+				immediate = binInstruction & 0x0000FFFF;		//zero extend and isolate immediate
+				CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] ^ CURRENT_STATE.REGS[rs];
+				
 
 			case 0xA: //SLTI
 				/* The 16-bit immediate is sign-extended and subtracted from the contents of
@@ -783,7 +790,7 @@ void handle_instruction()
 
 				//sign extend offset
 				temp = offset + CURRENT_STATE.REGS[base];
-				if (temp & 0x10000000 == 1){
+				if ((temp & 0x10000000) == 1){
 					printf("SH address error exception occurred\n");
 				}
 				else
