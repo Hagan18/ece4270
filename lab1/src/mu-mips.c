@@ -9,6 +9,7 @@ int flag;
 uint32_t prevInstruction;
 int jumpFlag;
 
+
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
 /***************************************************************/
