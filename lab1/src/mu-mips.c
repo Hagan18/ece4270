@@ -631,9 +631,7 @@ void handle_instruction()
 	else if ((flag)){
 		printf("inside elseif\n");
 		long int immediate;
-		switch(binInstruction){
-
-
+		switch(instruction){
 			case 0x8: //ADDI
 				/* The 16-bit immediate is sign-extended and added to the contents of general
 				 * register rs to form the result. The result is placed into general register rt.
@@ -825,7 +823,7 @@ void handle_instruction()
 
 				//sign extend offset
 				temp = offset + CURRENT_STATE.REGS[base];
-				if ((temp & 0x10000000) == 1){
+				if ((temp & 0x10000000) == 0x10000000){
 					printf("SH address error exception occurred\n");
 				}
 				else
@@ -840,6 +838,13 @@ void handle_instruction()
 				*/
 
 				// long int delay = 
+				rt = binInstruction & 0x001F0000;
+				rt = rs >> 16;
+				rs = binInstruction & 0x03E00000;
+				rs = rs >> 21;
+				if (rs == rt){
+					CURRENT_STATE.PC = CURRENT_STATE.REGS[rs];
+				}
 
 			case 0x5: //BNE
 				/* A branch target address is computed from the sum of the address of the
@@ -850,6 +855,14 @@ void handle_instruction()
 				 * instruction.
 				*/
 
+				rt = binInstruction & 0x001F0000;
+				rt = rs >> 16;
+				rs = binInstruction & 0x03E00000;
+				rs = rs >> 21;
+				if (rs != rt){
+					CURRENT_STATE.PC = CURRENT_STATE.REGS[rs];
+				}
+
 			case 0x6: //BLEZ
 				/* A branch target address is computed from the sum of the address of the
 				 * instruction in the delay slot and the 16-bit offset, shifted left two bits and
@@ -857,6 +870,15 @@ void handle_instruction()
 				 * the contents of general registerrs have the sign bit set, or are equal to zero,
 				 * then the program branches to the target address, with a delay of one instruction.
 				*/
+
+				rs = binInstruction & 0x03E00000;
+				rs = rs >> 21;
+				if (rs == 0x0){
+					CURRENT_STATE.PC = CURRENT_STATE.REGS[rs];
+				}
+				else if (((rs & 0x00008000) >> 16) == 0x1){		//the msb of offset is 1 i.e. offset is negative
+					CURRENT_STATE.PC = CURRENT_STATE.REGS[rs];
+				}
 
 			case 0x7: //BGTZ
 				/* A branch target address is computed from the sum of the address of the
@@ -866,28 +888,67 @@ void handle_instruction()
 				 * equal to zero, then the program branches to the target address, with a
 				 * delay of one instruction.
 				*/
+
+				rs = binInstruction & 0x03E00000;
+				rs = rs >> 21;
+				if (rs != 0x0){
+					CURRENT_STATE.PC = CURRENT_STATE.REGS[rs];
+				}
+				else if (((rs & 0x00008000) >> 16) == 0x0){		//the msb of offset is 0
+					CURRENT_STATE.PC = CURRENT_STATE.REGS[rs];
+				}
 				
 
 			case 0x2: //J
-				// target = binInstruction & 0x03FFFFFFL;
+				/* The 26-bit target address is shifted left two bits and combined with the
+				 * high-order bits of the address of the delay slot. The program
+				 * unconditionally jumps to this calculated address with a delay of one instruction.
+				*/
+				// target = binInstruction & 0x03FFFFFF;
 				// target = target binInstruction << 2;
 				//what are the delay slots??
 				//address once combined with delay slot should be subtracted from current address
 				//update jumpNum to see how far you have to jump at the end
 				//supposed to delay one cycle but I don't know how to do that
 
-			case 0x3: //JAL
+				// long int target = binInstruction & 0x03FFFFFF;
+				// target = target >> 2;
+
+			case 0x0: //JAL
 				break;
 
-			/* Not included:
-			 * BLTZ
-			 * BGEZ
-			 */
+			case 0x01:
+				if (((binInstruction & 0x001F0000) >> 16) == 0x0){		//BLTZ
+					/* A branch target address is computed from the sum of the address of the
+					 * instruction in the delay slot and the 16-bit offset, shifted left two bits and
+					 * sign-extended. If the contents of general register rs have the sign bit set,
+					 * then the program branches to the target address, with a delay of one instruction.
+					*/
+
+					rs = binInstruction & 0x03E00000; 			//mask the rs register
+					rs = rs >> 21;
+					if (((rs & 0x00008000) >> 16) == 0x1){		//the msb of offset is 1 i.e. offset is negative
+						CURRENT_STATE.PC = CURRENT_STATE.REGS[rs];
+					}
+
+				else if (((binInstruction & 0x001F0000) >> 16) == 0x0){	//BGEZ
+					/* A branch target address is computed from the sum of the address of the
+					 * instruction in the delay slot and the 16-bit offset, shifted left two bits and
+					 * sign-extended. If the contents of general register rs have the sign bit
+					 * cleared, then the program branches to the target address, with a delay of
+					 * one instruction.
+					*/
+
+					rs = binInstruction & 0x03E00000; 			//mask the rs register
+					rs = rs >> 21;
+					if (((rs & 0x00008000) >> 16) == 0x0){		//the msb of offset is 1 i.e. offset is negative
+						CURRENT_STATE.PC = CURRENT_STATE.REGS[rs];
+					}
+				}
+			}
 		}
 	}
-		
-	NEXT_STATE.PC = CURRENT_STATE.PC + jumpNum;	
-			
+	NEXT_STATE.PC = CURRENT_STATE.PC + jumpNum;
 }
 
 
