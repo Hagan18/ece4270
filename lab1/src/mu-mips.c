@@ -710,18 +710,17 @@ void handle_instruction()
 				*/
 
 				rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs
-				rt = rs ^ (binInstruction & 0x000FFFF);			//isolate the contents of 'immediate'
-				rt = signExtend(rt);
-				if (rs < rt){
+				immediate = (binInstruction & 0x000FFFF);		//isolate the contents of 'immediate'
+				immediate = signExtend(immediate);
+				CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] ^ CURRENT_STATE.REGS[rs];
+				if (CURRENT_STATE.REGS[rs] < CURRENT_STATE.REGS[rt]){
 					rt = rt & 0x0;
 					rt = rt | 0x00000001;
+					CURRENT_STATE.REGS[rt] = rt;
 				}
 				else {
-					rt = rt & 0x0;
+					CURRENT_STATE.REGS[rt] = rt & 0x0;
 				}
-
-				binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
-				binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
 
 			case 0x23: //LW
 				/* The 16-bit offset is sign-extended and added to the contents of general
@@ -732,10 +731,20 @@ void handle_instruction()
 				 * address error exception occurs.
 				*/
 
+				rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs (in this case, base)
+				immediate = (binInstruction & 0x000FFFF);		//isolate the contents of 'immediate'
+				immediate = signExtend(immediate);
+
+				CURRENT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] + CURRENT_STATE.REGS[rs];
 
 
 			case 0x20: //LB
-				//sign extend the offset (take left most bit and concatenate 16 of those on)
+				/* The 16-bit offset is sign-extended and added to the contents of general
+				 * register base to form a virtual address. The contents of the byte at the
+				 * memory location specified by the effective address are sign-extended and
+				 * loaded into general register rt.
+				*/
+
 				offset =  binInstruction & 0x0FFFF; 
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x001F;
@@ -747,7 +756,13 @@ void handle_instruction()
 				
 
 			case 0x21: //LH
-				//sign extend on the 
+				/* The 16-bit offset is sign-extended and added to the contents of general
+				 * register base to form a virtual address. The contents of the halfword at the
+				 * memory location specified by the effective address are sign-extended and
+				 * loaded into general register rt.
+				 * If the least-significant bit of the effective address is non-zero, an address
+				 * error exception occurs.
+				*/
 				offset =  binInstruction & 0x0FFFF; 
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x001F;
@@ -757,7 +772,18 @@ void handle_instruction()
 				//sign extend temp at bit 16
 				NEXT_STATE.REGS[rt] = temp;	
 
+				if (temp == (temp & 0xFFFFFFFE)){
+					printf("an overflow has occurred");
+				}
+
 			case 0x2B: //SW
+				/* The 16-bit offset is sign-extended and added to the contents of general
+				 * register base to form a virtual address. The contents of general register rt
+				 * are stored at the memory location specified by the effective address.
+				 * If either of the two least-significant bits of the effective address are nonzero,
+				 * an address error exception occurs
+				*/
+
 				offset =  binInstruction & 0x0FFFF; 
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x001F;
@@ -766,10 +792,13 @@ void handle_instruction()
 				
 				//sign extend offset
 				temp = offset + CURRENT_STATE.REGS[base];
-				temp* = CURRENT_STATE.REGS[rt];
+				&temp = CURRENT_STATE.REGS[rt];
 
 			case 0x28: //SB
-			
+				/* The 16-bit offset is sign-extended and added to the contents of general
+				 * register baseto form a virtual address. The least-significant byte of register
+				 * rt is stored at the effective address.
+				*/
 				offset =  binInstruction & 0x0FFFF; 
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x001F;
@@ -779,9 +808,15 @@ void handle_instruction()
 				//sign extend offset
 				temp = offset + CURRENT_STATE.REGS[base];
 				//least sig byte of register rt is store at effective address
-				(temp)* = CURRENT_STATE.REGS[rt] >> 24;
+				&(temp) = CURRENT_STATE.REGS[rt] >> 24;
 
 			case 0x29: //SH
+				/* The 16-bit offset is sign-extended and added to the contents of general
+				 * register base to form an unsigned effective address. The least-significant
+				 * halfword of register rt is stored at the effective address. If the leastsignificant
+				 * bit of the effective address is non-zero, an address error
+				 * exception occurs
+				*/
 				offset =  binInstruction & 0x0FFFF; 
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x001F;
@@ -797,17 +832,45 @@ void handle_instruction()
 					temp* = CURRENT_STATE.REGS[rt] >> 16;
 
 			case 0x4: //BEQ
+				/* A branch target address is computed from the sum of the address of the
+				 * instruction in the delay slot and the 16-bit offset, shifted left two bits and
+				 * sign-extended. The contents of general register rs and the contents of
+				 * general register rt are compared. If the two registers are equal, then the
+				 * program branches to the target address, with a delay of one instruction.
+				*/
+
+				// long int delay = 
 
 			case 0x5: //BNE
+				/* A branch target address is computed from the sum of the address of the
+				 * instruction in the delay slot and the 16-bit offset, shifted left two bits and
+				 * sign-extended. The contents of general register rs and the contents of
+				 * general register rt are compared. If the two registers are not equal, then
+				 * the program branches to the target address, with a delay of one
+				 * instruction.
+				*/
 
 			case 0x6: //BLEZ
+				/* A branch target address is computed from the sum of the address of the
+				 * instruction in the delay slot and the 16-bit offset, shifted left two bits and
+				 * sign-extended. The contents of general registerrs are compared to zero. If
+				 * the contents of general registerrs have the sign bit set, or are equal to zero,
+				 * then the program branches to the target address, with a delay of one instruction.
+				*/
 
 			case 0x7: //BGTZ
+				/* A branch target address is computed from the sum of the address of the
+				 * instruction in the delay slot and the 16-bit offset, shifted left two bits and
+				 * sign-extended. The contents of general registerrs are compared to zero. If
+				 * the contents of general register rs have the sign bit cleared and are not
+				 * equal to zero, then the program branches to the target address, with a
+				 * delay of one instruction.
+				*/
 				
 
 			case 0x2: //J
-				target = binInstruction & 0x03FFFFFFL;
-				target = target binInstruction << 2;
+				// target = binInstruction & 0x03FFFFFFL;
+				// target = target binInstruction << 2;
 				//what are the delay slots??
 				//address once combined with delay slot should be subtracted from current address
 				//update jumpNum to see how far you have to jump at the end
