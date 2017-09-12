@@ -351,30 +351,29 @@ void handle_instruction()
 		switch(instruction){//case statement for right
 			//ADD
 			case 0x20:
-				printf("ADD\n");
+				
 				binInstruction = binInstruction >> 11;//define rd rt rs as ints?
-				printf("after first shift %u\n", binInstruction);
+				
 				rd = binInstruction & 0x001F;
-				printf("rd after first and %ld\n", rd);
+				
 				binInstruction = binInstruction >> 5;
 				rt = binInstruction & 0x01F;
-				printf("rt after first and %ld\n", rt);
+				
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
-				printf("rs after first and %ld\n", rs);
-				printf("after rs shift %u\n", binInstruction);
+				
 				// check for overflow
 				overflow = binInstruction >> 9;
 				if ((overflow | 0x0) == 0){
 					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] + CURRENT_STATE.REGS[rs];
-					printf("%u\n", NEXT_STATE.REGS[rd]);
+					
 				}
 				else
 					printf("Addition Overflow\n");
 				break;
 			//ADDU		
 			case 0x21:
-				printf("ADDU\n");
+				
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
@@ -385,7 +384,7 @@ void handle_instruction()
 				break;
 			//AND - havent checked
 			case 0x24:
-				printf("AND\n");
+				
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
@@ -393,11 +392,11 @@ void handle_instruction()
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
 				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
-				printf("%u\n", NEXT_STATE.REGS[rd]);
+				
 				break;
 			//SUB no check
 			case 0x22: 
-				printf("SUB\n");
+				
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
@@ -407,14 +406,14 @@ void handle_instruction()
 				overflow = binInstruction >> 9;
 				if ((overflow | 0x0) == 0){
 					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs]-CURRENT_STATE.REGS[rt];
-					printf("%u\n", NEXT_STATE.REGS[rd]);
+					
 				}
 				else
 					printf("Subtraction Overflow\n");
 				break;
 			//SUBU havent checked
 			case 0x23:
-				printf("SUBU\n");
+				
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
@@ -422,11 +421,11 @@ void handle_instruction()
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
 				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs]-CURRENT_STATE.REGS[rt];
-				printf("%u\n", NEXT_STATE.REGS[rd]);
+				
 				break;
 		//MULT 
 			case 0x18:
-				printf("MULT\n");
+				
 				//int64_t tempMult;
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x01F;
@@ -451,7 +450,7 @@ void handle_instruction()
 			//MULTU needs work
 			case 0x19:
 				//uint64_t tempMultU;
-				printf("MULTU\n");
+				
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 5;
@@ -473,7 +472,7 @@ void handle_instruction()
 			//DIV 
 			case 0x1A:
 				//int32_t tempDiv;
-				printf("DIV\n");
+				
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x01F;
 				if (prevInstruction == 0x12 || prevInstruction == 0x10){				
@@ -501,7 +500,7 @@ void handle_instruction()
 			
 			//DIVU 
 			case 0x1B:
-				printf("DIVU\n");
+				
 				//uint32_t tempDivU;
 				binInstruction = binInstruction >> 16;
 				rt = binInstruction & 0x01F;
@@ -527,7 +526,7 @@ void handle_instruction()
 				break;
 			//OR
 			case 0x25:
-				printf("OR\n");
+				
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
@@ -535,12 +534,12 @@ void handle_instruction()
 				binInstruction = binInstruction >> 5;
 				rs = binInstruction & 0x1F;
 				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt];
-				printf("%u\n", NEXT_STATE.REGS[rd]);
+				
 				break;
 			
 			//NOR 
 			case 0x27:
-				printf("NOR\n");
+				
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
@@ -551,7 +550,7 @@ void handle_instruction()
 				break;
 			//XOR
 			case 0x26:
-				printf("XOR\n");
+				
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
@@ -562,7 +561,7 @@ void handle_instruction()
 				break;
 			//SLT
 			case 0x2A:
-				printf("SLT\n");
+				
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
@@ -579,7 +578,7 @@ void handle_instruction()
 				break;
 			//SLL 
 			case 0x0:
-				printf("SLL\n");
+				
 				binInstruction = binInstruction >> 6;
 				sa = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
@@ -590,7 +589,7 @@ void handle_instruction()
 				break;
 			//SRA 
 			case 0x3:
-				printf("SRA\n");
+				
 				binInstruction = binInstruction >> 6;
 				sa = binInstruction & 0x001F;
 				binInstruction = binInstruction >> 5;
@@ -602,28 +601,28 @@ void handle_instruction()
 			//HOW TO SIGN EXTEND IT
 			//MFLO not checked
 			case 0x12:
-				printf("MFLO\n");
+				
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x01F;
 				NEXT_STATE.REGS[rd] = CURRENT_STATE.LO;
 				break;
 			//MFHI
 			case 0x10:
-				printf("MFHI\n");
+				
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x01F;
 				NEXT_STATE.REGS[rd] = CURRENT_STATE.HI;
 				break;
 			//MTHI
 			case 0x11:
-				printf("MTHI\n");
+				
 				binInstruction = binInstruction >> 21;
 				rd = binInstruction & 0x01F;
 				NEXT_STATE.HI = CURRENT_STATE.REGS[rd];
 				break;
 			//MTLO
 			case 0x13:
-				printf("MTLO\n");
+				
 				binInstruction = binInstruction >> 21;
 				rd = binInstruction & 0x01F;
 				NEXT_STATE.LO = CURRENT_STATE.REGS[rd];
@@ -631,14 +630,14 @@ void handle_instruction()
 				
 			//JR
 			case 0x8:
-				printf("JR\n");
+				
 				binInstruction = binInstruction >> 21;
 				rs = binInstruction & 0x01F;
 				jumpNum = CURRENT_STATE.REGS[rs]- CURRENT_STATE.PC;
 				break;
 			//JALR
 			case 0x5:
-				printf("JALR\n");
+				
 				binInstruction = binInstruction >> 11;
 				rd = binInstruction & 0x01F;
 				binInstruction = binInstruction >> 10;
@@ -665,7 +664,7 @@ void handle_instruction()
                 
 			//SYSCALL
 			case 0xC:
-				printf("SYSCALL\n");
+				
 				if (CURRENT_STATE.REGS[2] == 0xA){
 					RUN_FLAG = FALSE;
 				}
@@ -675,11 +674,11 @@ void handle_instruction()
 		}
 	}
 	else if ((flag)){
-		printf("inside elseif\n");
+		
 		long int immediate;
 		switch(instruction){
 			case 0x8: //ADDI
-                            printf("ADDI\n");
+                           
                             /* The 16-bit immediate is sign-extended and added to the contents of general
                                 * register rs to form the result. The result is placed into general register rt.
                                 * In 64-bit mode, the operand must be valid sign-extended, 32-bit values.
@@ -695,12 +694,12 @@ void handle_instruction()
                             // rt = rs + (binInstruction & 0x000FFFF);			//ADD rt with the contents of 'immediate'
                             // binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
                             // binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
-                            CURRENT_STATE.REGS[rt] = immediate + CURRENT_STATE.REGS[rs];
+                            NEXT_STATE.REGS[rt] = immediate + CURRENT_STATE.REGS[rs];
 
 		// NOTE: Need to add overflow functionality!
 
 			case 0x9: //ADDIU
-                            printf("ADDU\n");
+                          
                             /* The 16-bit immediate is sign-extended and added to the contents of general
                                 * register rs to form the result. The result is placed into general register rt.
                                 * No integer overflow exception occurs under any circumstances. In 64-bit
@@ -715,11 +714,11 @@ void handle_instruction()
                             // rt = rs + rt;									//ADD rt with the contents of 'immediate'
                             // binInstruction = binInstruction & 0xFE0FFFFF;	//clear out the rt register
                             // binInstruction = (binInstruction | (rt << 16)); //shift rt to its correct position and OR it with the original value
-                            CURRENT_STATE.REGS[rt] = immediate + CURRENT_STATE.REGS[rs];
+                           NEXT_STATE.REGS[rt] = immediate + CURRENT_STATE.REGS[rs];
                             break;
 
 			case 0xC: //ANDI
-                            printf("ANDI\n");
+                            
                             /*The 16-bit immediate is zero-extended and combined with the contents of
                                 * general registerrsin a bit-wise logical AND operation. The result is placed
                                 * into general register rt.
@@ -728,11 +727,11 @@ void handle_instruction()
                             rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs
                             rt = (binInstruction >> 16) & 0x0000001F;
                             immediate = binInstruction & 0x0000FFFF;
-                            CURRENT_STATE.REGS[rt] = immediate & CURRENT_STATE.REGS[rs];
+                            NEXT_STATE.REGS[rt] = immediate & CURRENT_STATE.REGS[rs];
                             break;
 
 			case 0xD: //ORI
-                            printf("ORI\n");
+                            
                             /* The 16-bit immediate is zero-extended and combined with the contents of
                                 * general register rs in a bit-wise logical OR operation. The result is placed
                                 * into general register rt.
@@ -741,11 +740,11 @@ void handle_instruction()
                             rs = (binInstruction >> 21) & 0x0000001F;
                             rt = (binInstruction >> 16) & 0x0000001F;
                             immediate = binInstruction & 0x0000FFFF;
-                            CURRENT_STATE.REGS[rt] = immediate | CURRENT_STATE.REGS[rs];
+                            NEXT_STATE.REGS[rt] = immediate | CURRENT_STATE.REGS[rs];
                             break;
 
 			case 0xE: //XORI
-                            printf("XORI\n");
+                           
                             /* The 16-bit immediate is zero-extended and combined with the contents of
                                 * general register rs in a bit-wise logical exclusive OR operation.
                                 * The result is placed into general register rt.
@@ -754,11 +753,11 @@ void handle_instruction()
                             rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs
                             rt = (binInstruction >> 16) & 0x0000001F;
                             immediate = binInstruction & 0x0000FFFF;		//zero extend and isolate immediate
-                            CURRENT_STATE.REGS[rt] = immediate ^ CURRENT_STATE.REGS[rs];
+                            NEXT_STATE.REGS[rt] = immediate ^ CURRENT_STATE.REGS[rs];
                             break;
 
 			case 0xA: //SLTI
-                            printf("SLTI\n");
+                            
                             /* The 16-bit immediate is sign-extended and subtracted from the contents of
                                 * general register rs. Considering both quantities as signed integers, if rs is
                                 * less than the sign-extended immediate, the result is set to one; otherwise
@@ -772,17 +771,17 @@ void handle_instruction()
                             rt = (binInstruction >> 16) & 0x0000001F;
                             immediate = (binInstruction & 0x000FFFF);		//isolate the contents of 'immediate'
                             immediate = signExtend(immediate);
-                            CURRENT_STATE.REGS[rt] = immediate - CURRENT_STATE.REGS[rs];
+                            jumpNum = immediate - CURRENT_STATE.REGS[rs];
                             if (CURRENT_STATE.REGS[rs] < immediate){
-                                    CURRENT_STATE.REGS[rt] = 0x01;
+                                    NEXT_STATE.REGS[rt] = 0x01;
                             }
                             else {
-                                    CURRENT_STATE.REGS[rt] = rt & 0x0;
+                                    NEXT_STATE.REGS[rt] = rt & 0x0;
                             }
                             break;
 
 			case 0x23: //LW
-                            printf("LW\n");
+                            
                             /* The 16-bit offset is sign-extended and added to the contents of general
                                 * register base to form a virtual address. The contents of the word at the
                                 * memory location specified by the effective address are loaded into general
@@ -796,11 +795,11 @@ void handle_instruction()
                             immediate = (binInstruction & 0x000FFFF);		//isolate the contents of 'immediate'
                             immediate = signExtend(immediate);
 
-                            CURRENT_STATE.REGS[rt] = mem_read_32(immediate + CURRENT_STATE.REGS[rs]);
+                            NEXT_STATE.REGS[rt] = mem_read_32(immediate + CURRENT_STATE.REGS[rs]);
                             break;
 
 			case 0x20: //LB
-                            printf("LB\n");
+                           
                             /* The 16-bit offset is sign-extended and added to the contents of general
                                 * register base tbltz o form a virtual address. The contents of the byte at the
                                 * memory location specified by the effective address are sign-extended and
@@ -817,7 +816,7 @@ void handle_instruction()
                             break;
 
 			case 0x21: //LH
-                            printf("LH\n");
+                            
                             /* The 16-bit offset is sign-extended and added to the contents of general
                                 * register base to form a virtual address. The contents of the halfword at the
                                 * memory location specified by the effective address are sign-extended and
@@ -841,7 +840,7 @@ void handle_instruction()
                             break;
 
 			case 0x2B: //SW
-                            printf("SW\n");
+                           
                             /* The 16-bit offset is sign-extended and added to the contents of general
                                 * register base to form a virtual address. The contents of general register rt
                                 * are stored at the memory location specified by the effective address.
@@ -858,12 +857,11 @@ void handle_instruction()
                             
                             effectiveAddress = offset + CURRENT_STATE.REGS[base];//NEED TO FIGURE THIS OUT
                             mem_write_32(effectiveAddress, CURRENT_STATE.REGS[rt]);
-                            printf("rt: %08ld | offset: %08u | REGS[base]: %08x | REGS[rt]: %08x\n",rt,offset, CURRENT_STATE.REGS[base], CURRENT_STATE.REGS[rt]);
-                            printf("Writing to addr: %08x\n", effectiveAddress);
+                           
                             break;
 
 			case 0x28: //SB
-                            printf("SB\n");
+                           
                             /* The 16-bit offset is sign-extended and added to the contents of general
                                 * register baseto form a virtual address. The least-significant byte of register
                                 * rt is stored at the effective address.
@@ -874,17 +872,17 @@ void handle_instruction()
                             binInstruction = binInstruction >> 5;
                             base = binInstruction & 0x001F;
                             offset = signExtend(offset);
-                            printf("rt: %08ld | offset: %08ud\n",rt,offset);
+                            
                             //sign extend offset
                             effectiveAddress = offset + CURRENT_STATE.REGS[base];//NEED TO FIGURE THIS OUT
                             //least sig byte of register rt is store at effective address
                             //*(effectiveAddress) = CURRENT_STATE.REGS[rt] >> 24;
                             mem_write_32(effectiveAddress, CURRENT_STATE.REGS[rt]>>24);
-                            printf("Writing to addr: %08x\n", effectiveAddress);
+                            
                             break;
 
 			case 0x29: //SH
-                            printf("SH\n");
+                            
                             /* The 16-bit offset is sign-extended and added to the contents of general
                                 * register base to form an unsigned effective address. The least-significant
                                 * halfword of register rt is stored at the effective address. If the leastsignificant
@@ -906,12 +904,11 @@ void handle_instruction()
                                     //*effectiveAddress = CURRENT_STATE.REGS[rt] >> 16;
                                 mem_write_32(effectiveAddress, CURRENT_STATE.REGS[rt]>>16);
                             }
-                            printf("rt: %08ld | offset: %08d\n",rt,offset);
-                            printf("Writing to addr: %08x\n", effectiveAddress);
+                            
                             break;
 
 			case 0x4: //BEQ
-                            printf("BEQ\n");
+                           
                             /* A branch target address is computed from the sum of the address of the
                                 * instruction in the delay slot and the 16-bit offset, shifted left two bits and
                                 * sign-extended. The contents of general register rs and the contents of
@@ -933,7 +930,7 @@ void handle_instruction()
                             break;
 
 			case 0x5: //BNE
-                            printf("BNE\n");
+                            
                             /* A branch target address is computed from the sum of the address of the
                                 * instruction in the delay slot and the 16-bit offset, shifted left two bits and
                                 * sign-extended. The contents of general register rs and the contents of
@@ -953,7 +950,7 @@ void handle_instruction()
                             }
                             break;
 			case 0x6: //BLEZ
-                            printf("BLEZ\n");
+                           
                             /* A branch target address is computed from the sum of the address of the
                                 * instruction in the delay slot and the 16-bit offset, shifted left two bits and
                                 * sign-extended. The contents of general registerrs are compared to zero. If
@@ -973,7 +970,7 @@ void handle_instruction()
                             }
                             break;
 			case 0x7: //BGTZ
-                            printf("BGTZ\n");
+                           
                             /* A branch target address is computed from the sum of the address of the
                                 * instruction in the delay slot and the 16-bit offset, shifted left two bits and
                                 * sign-extended. The contents of general registerrs are compared to zero. If
@@ -995,7 +992,7 @@ void handle_instruction()
                             break;	
 
 			case 0x2: //J
-                            printf("J\n");
+                          
                             /* The 26-bit target address is shifted left two bits and combined with the
                                 * high-order bits of the address of the delay slot. The program
                                 * unconditionally jumps to this calculated address with a delay of one instruction.
@@ -1013,7 +1010,7 @@ void handle_instruction()
                             break;
                             
 			case 0x03: //JAL
-                            printf("JAL\n");
+                            
                             target = binInstruction & 0x03FFFFFF;
                             target = target << 2;
                             NEXT_STATE.PC = target + (CURRENT_STATE.PC & 0xF0000000);
@@ -1026,7 +1023,7 @@ void handle_instruction()
                             offset = binInstruction & 0x0000FFFF;
                             offset = signExtend(offset << 2);
                             if (((binInstruction & 0x001F0000) >> 16) == 0x01){
-                                printf("BLTZ\n");
+                                
                                 /* A branch target address is computed from the sum of the address of the
                                     * instruction in the delay slot and the 16-bit offset, shifted left two bits and
                                     * sign-extended. If the contents of general register rs have the sign bit set,
@@ -1040,7 +1037,7 @@ void handle_instruction()
                                 }
                             }
                             else if (((binInstruction & 0x001F0000) >> 16) == 0x0){	//BGEZ
-                                printf("BGEZ\n");
+                                
                                 /* A branch target address is computed from the sum of the address of the
                                     * instruction in the delay slot and the 16-bit offset, shifted left two bits and
                                     * sign-extended. If the contents of general register rs have the sign bit
@@ -1058,7 +1055,7 @@ void handle_instruction()
                             
 			//LUI
                         case 0x0F: 
-                            printf("LUI\n");
+                            
                             immediate = binInstruction & 0x0FFFF;//isolate immediate
                             binInstruction = binInstruction >> 16;
                             rt = binInstruction & 0x1F;//isolate rt
