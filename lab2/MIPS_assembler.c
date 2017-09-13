@@ -138,11 +138,15 @@ void r_type_format(long int instruction, char* reg1, char* reg2, char* reg3){
     unsigned int r1 = registerLookup(reg1);
     unsigned int r2 = registerLookup(reg2);
     unsigned int r3 = registerLookup(reg3);
-    printf("instruction: %08ld\n reg1: %08x\nreg2: %08x\nreg3: %08x\n",instruction,r1,r2,r3);
+    printf("instruction: %ld\nreg1: %x\nreg2: %x\nreg3: %x\n",instruction,r1,r2,r3);
 }
 
 void i_type_format(long int instruction, char* reg1, char* reg2, char* offset){
-    
+    unsigned int r1 = registerLookup(reg1);
+    unsigned int r2 = registerLookup(reg2);
+    unsigned long immediate;
+    immediate = strtol(offset,NULL,16);
+    printf("instruction: %ld\nreg1: %x\nreg2: %x\noffset: %ld\n",instruction,r1,r2,immediate);
 }
 
 unsigned int registerLookup(char* reg){
