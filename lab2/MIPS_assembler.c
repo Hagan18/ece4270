@@ -5,8 +5,8 @@
 
 int NUM_INSTRUCTIONS = 0;
 
-void r_type_format(long int instruction, char* reg1, char* reg2, char* reg3);
-void i_type_format(long int instruction, char* reg1, char* reg2, char* offset);
+unsigned int r_type_format(unsigned int instruction, unsigned int rd, unsigned int rs, unsigned int rt);
+unsigned int i_type_format(unsigned int instruction, unsigned int rs, unsigned int rt, unsigned int offset);
 unsigned int registerLookup(char* reg);
 unsigned int getRegister(char* reg);
 unsigned int hexInstruction=0;
@@ -50,11 +50,11 @@ int main(int argc, char *argv[]) {
 		    rs = getRegister(reg1);
             rt = getRegister(reg2);
             immediate = strtol(offset,NULL,16);//getRegister(offset);
-            hexInstruction = (0x09 << 26) | (rs << 21) | (rt << 16) | immediate;
+            hexInstruction = i_type_format(0x09,rs,rt,immediate);
             printf("ADDIU: %x\nrs: %x, rt: %x, immediate: %x\n",hexInstruction,rs,rt,immediate);
-		    
 		}
 		else if (strcmp("sub", instruction)== 0){
+		    
 		}
 		else if (strcmp("subu", instruction)== 0){
 		}
@@ -154,21 +154,18 @@ unsigned int getRegister(char* reg){
     return registerLookup(reg);
 }
 
-void r_type_format(long int instruction, char* reg1, char* reg2, char* reg3){
-    unsigned int r1 = registerLookup(reg1);
-    unsigned int r2 = registerLookup(reg2);
-    unsigned int r3 = registerLookup(reg3);
-    printf("instruction: %ld\nreg1: %x\nreg2: %x\nreg3: %x\n",instruction,r1,r2,r3);
-    // hexInstruction = (instruction << 21) | ()
+unsigned int r_type_format(unsigned int instruction, unsigned int rd, unsigned int rs, unsigned int rt){
+    return (rs << 21) | (rt << 16) | (rd << 11) | instruction;
     
 }
 
-void i_type_format(long int instruction, char* reg1, char* reg2, char* offset){
-    unsigned int r1 = registerLookup(reg1);
-    unsigned int r2 = registerLookup(reg2);
-    unsigned long immediate;
-    immediate = strtol(offset,NULL,16);
-    printf("instruction: %ld\nreg1: %x\nreg2: %x\noffset: %ld\n",instruction,r1,r2,immediate);
+unsigned int i_type_format(unsigned int instruction, unsigned int rs, unsigned int rt, unsigned int offset){
+    // unsigned int r1 = registerLookup(reg1);
+    // unsigned int r2 = registerLookup(reg2);
+    // unsigned long immediate;
+    // immediate = strtol(offset,NULL,16);
+    // printf("instruction: %ld\nreg1: %x\nreg2: %x\noffset: %ld\n",instruction,r1,r2,immediate);
+    return ((instruction << 26) | (rs << 21) | (rt << 16) | offset);
 }
 
 unsigned int registerLookup(char* reg){
