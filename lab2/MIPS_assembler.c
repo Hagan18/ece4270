@@ -8,26 +8,36 @@ int NUM_INSTRUCTIONS = 0;
 void r_type_format(long int instruction, char* reg1, char* reg2, char* reg3);
 void i_type_format(long int instruction, char* reg1, char* reg2, char* offset);
 unsigned int registerLookup(char* reg);
+unsigned int getRegister(char* reg);
+unsigned int hexInstruction=0;
 
 
 int main(int argc, char *argv[]) {
-char* instruction = malloc(sizeof(char)*10);
-char* reg1 = malloc(sizeof(char)*5);
-char* reg2 = malloc(sizeof(char)*5);
-char* offset = malloc(sizeof(char)*5);
-FILE *fp = fopen(argv[1], "r");
+    unsigned int rd=0,rt=0,rs=0, immediate=0;
+    char* instruction = malloc(sizeof(char)*10);
+    char* reg1 = malloc(sizeof(char)*5);
+    char* reg2 = malloc(sizeof(char)*5);
+    char* offset = malloc(sizeof(char)*5);
+    FILE *fp = fopen(argv[1], "r");
     while (fscanf(fp, "%s %s %s %s\n", instruction, reg1, reg2,offset) != EOF){
         
         //This gets rid of the commas
         strcpy(reg1,strtok(reg1,","));
         strcpy(reg2,strtok(reg2,","));
+        
 	
         //checkInstruction(instruction, fp);
         printf("instruction: %s %s %s %s\n", instruction, reg1, reg2, offset);
 
 		if (strcmp("add", instruction)== 0){//
             //format: instruction, reg1, reg2, reg3
-            r_type_format(0x20,reg1,reg2,offset); 
+            // r_type_format(0x20,reg1,reg2,offset); 
+            rd = getRegister(reg1);
+            rs = getRegister(reg2);
+            rt = getRegister(offset);
+            hexInstruction = (rs << 21) | (rt << 16) | (rd << 11) | 0x20;
+            printf("ADD: %x\n",hexInstruction);
+            
 		}
 		else if (strcmp("addu", instruction)== 0){//
 		    r_type_format(0x21,reg1,reg2,offset);
@@ -36,7 +46,13 @@ FILE *fp = fopen(argv[1], "r");
 		    i_type_format(0x08,reg1,reg2,offset);
 		}
 		else if (strcmp("addiu", instruction)== 0){//
-		    i_type_format(0x09,reg1,reg2,offset);
+		  //  i_type_format(0x09,reg1,reg2,offset);
+		    rs = getRegister(reg1);
+            rt = getRegister(reg2);
+            immediate = strtol(offset,NULL,16);//getRegister(offset);
+            hexInstruction = (0x09 << 26) | (rs << 21) | (rt << 16) | immediate;
+            printf("ADDIU: %x\nrs: %x, rt: %x, immediate: %x\n",hexInstruction,rs,rt,immediate);
+		    
 		}
 		else if (strcmp("sub", instruction)== 0){
 		}
@@ -119,9 +135,9 @@ FILE *fp = fopen(argv[1], "r");
 		else if (strcmp("syscall", instruction)== 0){
 		}
 		
-		else  {
-                    printf("Did not find instruction\n");
-                }
+		else{
+                printf("Did not find instruction\n");
+        }
 		
 
 	
@@ -134,11 +150,17 @@ return 0;
          
 }
 
+unsigned int getRegister(char* reg){
+    return registerLookup(reg);
+}
+
 void r_type_format(long int instruction, char* reg1, char* reg2, char* reg3){
     unsigned int r1 = registerLookup(reg1);
     unsigned int r2 = registerLookup(reg2);
     unsigned int r3 = registerLookup(reg3);
     printf("instruction: %ld\nreg1: %x\nreg2: %x\nreg3: %x\n",instruction,r1,r2,r3);
+    // hexInstruction = (instruction << 21) | ()
+    
 }
 
 void i_type_format(long int instruction, char* reg1, char* reg2, char* offset){
