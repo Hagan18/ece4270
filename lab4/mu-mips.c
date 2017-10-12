@@ -382,7 +382,6 @@ void WB()//TA told us to update current state not next state, but updating curre
 /************************************************************/
 void MEM()
 {
-
 	/*IMPLEMENT THIS*/
 	//MEM_WB.IR = EX_MEM.IR;
 	if (EX_MEM.instruction_type == 0 || EX_MEM.instruction_type == 7 || EX_MEM.instruction_type == 8){
@@ -394,7 +393,6 @@ void MEM()
 		else if (EX_MEM.instruction_type == 8){ //LB
 			MEM_WB.LMD = ((MEM_WB.LMD & 0x000000FF) & 0x80) > 0 ? (MEM_WB.LMD | 0xFFFFFF00) : (MEM_WB.LMD & 0x000000FF);
 		}
-		
 		
 		
 	}
@@ -413,19 +411,19 @@ void MEM()
 	MEM_WB.PC = EX_MEM.PC;	
 	MEM_WB.IR = EX_MEM.IR;
 
-        if(ENABLE_FORWARDING){
-            if(MEM_WB.RegWrite && (MEM_WB.C != 0) && (!(EX_MEM.RegWrite && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRs) && MEM_WB.C == ID_EX.RegisterRs)){
-                //forwardA=01
-            }
-            
-           if(MEM_WB.RegWrite && (MEM_WB.C != 0) && (!(EX_MEM.RegWrite && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRt) && MEM_WB.C == ID_EX.RegisterRt)){
-                //forwardB=01
-            }
+    if(ENABLE_FORWARDING){
+    	if(MEM_WB.RegWrite && (MEM_WB.C != 0) && (!(EX_MEM.RegWrite && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRs) && MEM_WB.C == ID_EX.RegisterRs))){
+            //forwardA=01
         }
+        
+       if(MEM_WB.RegWrite && (MEM_WB.C != 0) && (!(EX_MEM.RegWrite && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRt) && MEM_WB.C == ID_EX.RegisterRt))){
+            //forwardB=01
+        }
+    }
 }
 
 /************************************************************/
-/* execution (EX) pipeline stage:                                                                          */ 
+/* execution (EX) pipeline stage:                           */ 
 /************************************************************/
 void EX()
 {
@@ -439,22 +437,21 @@ void EX()
 	EX_MEM.instruction_type = ID_EX.instruction_type;
 	EX_MEM.PC = ID_EX.PC;
 	
-        if(ENABLE_FORWARDING){
-            if(EX_MEM.RegWrite && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRs)){
-                //forwardA = 10
-            }
-            if((EX_MEM.RegWrite) && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRt)){
-                //forwardB = 10
-            }
+    if(ENABLE_FORWARDING){
+        if(EX_MEM.RegWrite && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRs)){
+            //forwardA = 10
         }
+        if((EX_MEM.RegWrite) && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRt)){
+            //forwardB = 10
+        }
+    }
 }
 
 /************************************************************/
-/* instruction decode (ID) pipeline stage:                                                         */ 
+/* instruction decode (ID) pipeline stage:                  */ 
 /************************************************************/
 void ID()
 {
-        
 	/*IMPLEMENT THIS*/
 	execute_instruction(IF_ID.IR, 0);
 	if (ID_EX.instruction_type == 6){//syscall
@@ -462,27 +459,27 @@ void ID()
 	}
 	ID_EX.IR = IF_ID.IR;
 	ID_EX.PC = IF_ID.PC;
-        if (ID_EX.instruction_type == 1){
-            ID_EX.RegWrite = 0;
+    if (ID_EX.instruction_type == 1){
+        ID_EX.RegWrite = 0;
+    }
+    else{
+        ID_EX.RegWrite = 1;
+    }
+    
+    if (!ENABLE_FORWARDING){
+        if((EX_MEM.RegWrite) && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRs)){
+            //stall
         }
-        else{
-            ID_EX.RegWrite = 1;
+        if((EX_MEM.RegWrite) && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRt)){
+            //stall
         }
-        
-        if (!ENABLE_FORWARDING){
-            if((EX_MEM.RegWrite) && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRs)){
-                //stall
-            }
-            if((EX_MEM.RegWrite) && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRt)){
-                //stall
-            }
-            if((MEM_WB.RegWrite) && (MEM_WB.C != 0) && (MEM_WB.C == ID_EX.RegisterRs)){
-                //stall
-            }
-            if(MEM_WB.RegWrite && (MEM_WB.C != 0) && (MEM_WB.C == ID_EX.RegisterRt)){
-                //stall
-            }
+        if((MEM_WB.RegWrite) && (MEM_WB.C != 0) && (MEM_WB.C == ID_EX.RegisterRs)){
+            //stall
         }
+        if((MEM_WB.RegWrite) && (MEM_WB.C != 0) && (MEM_WB.C == ID_EX.RegisterRt)){
+            //stall
+        }
+    }
 }
 
 /************************************************************/
@@ -500,8 +497,6 @@ void IF()
 		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
 		IF_ID.PC = NEXT_STATE.PC;
 	}
-	
-	
 }
 
 
@@ -515,7 +510,7 @@ void initialize() {
 	RUN_FLAG = TRUE; 
 }
 
-/************************************************************/ID_EX
+/************************************************************/
 /* Print the program loaded into memory (in MIPS assembly format)    */ 
 /************************************************************/
 void print_program(){
@@ -532,8 +527,8 @@ void print_program(){
 }
 
 /***************************************X/MEM*********************/
-/* Print the current pipeline                                                                                    */ 
-/************************************************************/
+/* Print the current pipeline                                    */ 
+/*****************************************************************/
 void show_pipeline(){
 	/*IMPLEMENT THIS*/
 	printf("---------------------------------IF--------------------------------------\n");
@@ -575,7 +570,7 @@ void show_pipeline(){
 }
 
 /***************************************************************/
-/* main                                                                                                                                   */
+/* main                                                        */
 /***************************************************************/
 int main(int argc, char *argv[]) {                              
 	printf("\n**************************\n");

@@ -56,7 +56,7 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	uint32_t ALUOutput2;
 	uint32_t LMD;
 	uint32_t instruction_type;
-	uint32_t RegWrite;
+	uint32_t RegWrite;	//This is used when writing to a register (1 = write, 0 = not writing)
 	uint32_t RegisterRs;
 	uint32_t RegisterRt;
 	
