@@ -322,7 +322,6 @@ void handle_pipeline()
 {
 	/*INSTRUCTION_COUNT should be incremented when instruction is done*/
 	/*Since we do not have branch/jump instructions, INSTRUCTION_COUNT should be incremented in WB stage */
-	
 	WB();
 	MEM();
 	EX();
@@ -371,9 +370,6 @@ void WB()//TA told us to update current state not next state, but updating curre
 			printf("SYSCALL error\n");		
 	}
 
-
-	
-	
 	INSTRUCTION_COUNT++;
 }
 
@@ -416,7 +412,7 @@ void MEM()
             //forwardA=01
         }
         
-       if(MEM_WB.RegWrite && (MEM_WB.C != 0) && (!(EX_MEM.RegWrite && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRt) && MEM_WB.C == ID_EX.RegisterRt))){
+        if(MEM_WB.RegWrite && (MEM_WB.C != 0) && (!(EX_MEM.RegWrite && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRt) && MEM_WB.C == ID_EX.RegisterRt))){
             //forwardB=01
         }
     }
@@ -466,17 +462,18 @@ void ID()
         ID_EX.RegWrite = 1;
     }
     
+    
     if (!ENABLE_FORWARDING){
-        if((EX_MEM.RegWrite) && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRs)){
+        if((EX_MEM.RegWrite) && (EX_MEM.rd != 0) && (EX_MEM.rd == ID_EX.RegisterRs)){
             //stall
         }
-        if((EX_MEM.RegWrite) && (EX_MEM.C != 0) && (EX_MEM.C == ID_EX.RegisterRt)){
+        if((EX_MEM.RegWrite) && (EX_MEM.rd != 0) && (EX_MEM.rd == ID_EX.RegisterRt)){
             //stall
         }
-        if((MEM_WB.RegWrite) && (MEM_WB.C != 0) && (MEM_WB.C == ID_EX.RegisterRs)){
+        if((MEM_WB.RegWrite) && (MEM_WB.rd != 0) && (MEM_WB.rd == ID_EX.RegisterRs)){
             //stall
         }
-        if((MEM_WB.RegWrite) && (MEM_WB.C != 0) && (MEM_WB.C == ID_EX.RegisterRt)){
+        if((MEM_WB.RegWrite) && (MEM_WB.rd != 0) && (MEM_WB.rd == ID_EX.RegisterRt)){
             //stall
         }
     }
@@ -645,8 +642,16 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.C = rd;
-					ID_EX.instruction_type = 2;
+					ID_EX.rd = CURRENT_STATE.REGS[rd];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
+					//ID_EX.instruction_type = 2;
+					
 				}
 				else if (execute_flag == 1){
 					EX_MEM.ALUOutput =ID_EX.A + ID_EX.B;
@@ -665,8 +670,15 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.C = rd;
-					ID_EX.instruction_type = 2;
+					ID_EX.rd = CURRENT_STATE.REGS[rd];
+					//ID_EX.instruction_type = 2;
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if(execute_flag == 1){
 					EX_MEM.ALUOutput = ID_EX.A + ID_EX.B;
@@ -684,8 +696,15 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.C =rd;
-					ID_EX.instruction_type = 2;
+					ID_EX.rd =CURRENT_STATE.REGS[rd];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
+					//ID_EX.instruction_type = 2;
 				}
 				else if(execute_flag == 1){
 					EX_MEM.ALUOutput = ID_EX.A & ID_EX.B;
@@ -703,8 +722,15 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.C = rd;
-					ID_EX.instruction_type = 2;
+					ID_EX.rd = CURRENT_STATE.REGS[rd];
+					// ID_EX.instruction_type = 2;
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if(execute_flag == 1){
 					EX_MEM.ALUOutput = ID_EX.A - ID_EX.B;
@@ -723,8 +749,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.C = rd;
-					ID_EX.instruction_type = 2;
+					ID_EX.rd = CURRENT_STATE.REGS[rd];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if (execute_flag == 1){
 					//NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs]-CURRENT_STATE.REGS[rt];
@@ -745,8 +777,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.instruction_type = 3;
-				
+					//ID_EX.instruction_type = 3;
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 2;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if (execute_flag == 1){
 					uint32_t p1=0,p2=0;
@@ -785,19 +823,26 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.instruction_type = 3;
+					//ID_EX.instruction_type = 3;
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 2;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				
 				}
 				else if (execute_flag == 1){
 					product = (uint64_t)ID_EX.A * (uint64_t)ID_EX.B;
-					 EX_MEM.ALUOutput = (product & 0X00000000FFFFFFFF);
-					 EX_MEM.ALUOutput2 = (product & 0XFFFFFFFF00000000)>>32;
+					EX_MEM.ALUOutput = (product & 0X00000000FFFFFFFF);
+					EX_MEM.ALUOutput2 = (product & 0XFFFFFFFF00000000)>>32;
 					//print_instruction(CURRENT_STATE.PC);
 				}
-					/*
-						If either of the two preceding instructions is MFHI or MFLO, the results of
-						these instructions are undefined. Correct operation requires separating
-						reads of HI or LO from writes by a minimum of two other instructions.
+				/*
+					If either of the two preceding instructions is MFHI or MFLO, the results of
+					these instructions are undefined. Correct operation requires separating
+					reads of HI or LO from writes by a minimum of two other instructions.
 				*/		
 				else{
 						printf("Execute_flag error\n");	
@@ -815,7 +860,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.instruction_type = 3;
+					//ID_EX.instruction_type = 3;
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 2;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if(execute_flag == 1){
 					
@@ -838,7 +890,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.instruction_type = 3;
+					//ID_EX.instruction_type = 3;
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 2;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 					
 				}
 				else if (execute_flag == 1){
@@ -852,7 +911,6 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 				break;
 			//OR
 			case 0x25:
-				
 				if (execute_flag == 0){
 					binInstruction = binInstruction >> 11;
 					rd = binInstruction & 0x001F;
@@ -862,8 +920,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.C = rs;
-					ID_EX.instruction_type = 2;
+					ID_EX.rd =CURRENT_STATE.REGS[rd];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if (execute_flag == 1){
 					EX_MEM.ALUOutput = ID_EX.A | ID_EX.B;
@@ -881,8 +945,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.C = rd;
-					ID_EX.instruction_type = 2;
+					ID_EX.rd =CURRENT_STATE.REGS[rd];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if (execute_flag == 1){	
 					EX_MEM.ALUOutput = ~(ID_EX.A | ID_EX.B);
@@ -899,8 +969,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.C = rd;
-					ID_EX.instruction_type = 2;
+					ID_EX.rd =CURRENT_STATE.REGS[rd];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if (execute_flag == 1){
 					EX_MEM.ALUOutput = ID_EX.A ^ ID_EX.B;//(CURRENT_STATE.REGS[rs]^CURRENT_STATE.REGS[rt]);
@@ -918,8 +994,15 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rs = binInstruction & 0x1F;
 					ID_EX.A = CURRENT_STATE.REGS[rs];
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.C = rd;
-					ID_EX.instruction_type = 2;
+					//ID_EX.instruction_type = 2;
+					ID_EX.rd =CURRENT_STATE.REGS[rd];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if (execute_flag == 1){
 					if(ID_EX.A < ID_EX.B){
@@ -942,15 +1025,22 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rt = binInstruction & 0x1F;
 					ID_EX.A = sa;
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.C = rd;
-					ID_EX.instruction_type = 2;
+					ID_EX.rd = CURRENT_STATE[rd];
+					//ID_EX.instruction_type = 2;
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if (execute_flag == 1){
 					EX_MEM.ALUOutput = ID_EX.B << ID_EX.A;
 					//print_instruction(CURRENT_STATE.PC);
 				}
 				break;
-			//SRA 
+			//SRA
 			case 0x3:
 				if (execute_flag == 0){
 					binInstruction = binInstruction >> 6;
@@ -961,8 +1051,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rt = binInstruction & 0x1F;
 					ID_EX.A = sa;
 					ID_EX.B = CURRENT_STATE.REGS[rt];
-					ID_EX.C = rd;
-					ID_EX.instruction_type = 2;
+					ID_EX.rd = CURRENT_STATE[rd];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if (execute_flag == 1){
 					EX_MEM.ALUOutput = ID_EX.B >> ID_EX.A;
@@ -974,9 +1070,16 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 			case 0x12:
 				if(execute_flag == 0){
 					binInstruction = binInstruction >> 11;
-					rd = binInstruction & 0x01F;
-					ID_EX.C = rd;
-					ID_EX.instruction_type = 2;
+					rd = binInstruction & 0x01F;// // 
+					ID_EX.rd = CURRENT_STATE.REGS[rd];
+					//ID_EX.instruction_type = 2;
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 2;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 0;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if (execute_flag == 1){
 					EX_MEM.ALUOutput = CURRENT_STATE.LO;
@@ -987,13 +1090,21 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 				if(execute_flag == 0){
 					binInstruction = binInstruction >> 11;
 					rd = binInstruction & 0x01F;
-					ID_EX.C = rd;
+					ID_EX.rd = CURRENT_STATE[rd];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 3;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 0;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if (execute_flag == 1){
 					EX_MEM.ALUOutput= CURRENT_STATE.HI;
 				}
 				else printf("Execute_flag error\n");	
 				break;
+//**************************************************************************************
 			//MTHI
 			case 0x11:
 				if (execute_flag == 0){
@@ -1001,6 +1112,15 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					rd = binInstruction & 0x01F;
 					ID_EX.A = CURRENT_STATE.REGS[rd];
 					ID_EX.instruction_type = 5;
+					ID_EX.C = CURRENT_STATE.REGS[rd];
+					//ID_EX.instruction_type = 2;
+					ID_EX.RegWrite = 0;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if (execute_flag == 1){
 					EX_MEM.ALUOutput2 = ID_EX.A;//needs to go in high register
@@ -1018,6 +1138,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					EX_MEM.ALUOutput = ID_EX.A;
 				}
 				break;
+//******************************************************************************************
 	        //SRL
 	        case 0x02:
 	        	if (execute_flag == 0){
@@ -1029,8 +1150,16 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 		            rt = binInstruction & 0x01F;
 		            ID_EX.A = sa;
 		            ID_EX.B = CURRENT_STATE.REGS[rt];
-		            ID_EX.C = rd;
-		            ID_EX.instruction_type = 2;
+		            //ID_EX.C = rd;
+		            //ID_EX.instruction_type = 2;
+		            ID_EX.rd = CURRENT_STATE.REGS[rd];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 	        	}
 	        	else if (execute_flag == 1){
 	            	EX_MEM.ALUOutput = ID_EX.B >> ID_EX.A;
@@ -1038,9 +1167,11 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 	        	break;
 			//SYSCALL
 			case 0xC:
+			//********************************************************************
 				if (execute_flag == 0){
 					ID_EX.A = CURRENT_STATE.REGS[2];
-					ID_EX.instruction_type = 6;
+					//ID_EX.instruction_type = 6;
+					SYSCALL_FLAG = 1;
 				}
 				/*else if (execute_flag == 1){
 					if(ID_EX.A == 0xa){
@@ -1049,11 +1180,10 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					}*/
 				//}
 				break;	
-				
+			//************************************************************************	
                 default:
                     printf("default on right hit\n");
 		}
-		
 	}
 	else if ((flag)){
 		long int immediate;
@@ -1072,8 +1202,16 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 			        rs = (binInstruction >> 21) & 0x0000001F;
 			        ID_EX.A = CURRENT_STATE.REGS[rs];
 			        ID_EX.imm = CURRENT_STATE.REGS[immediate];
-			        ID_EX.C = rt;
-			        ID_EX.instruction_type = 2;
+			        // ID_EX.C = rt;
+			        // ID_EX.instruction_type = 2;
+			        ID_EX.rd = CURRENT_STATE.REGS[rt];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 0;
+					ID_EX.RegDst = 1;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 		        }
 		        else if(execute_flag == 1){
 			        EX_MEM.ALUOutput = ID_EX.imm + ID_EX.A;
@@ -1094,7 +1232,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
                     	immediate = signExtend((binInstruction & 0x0000FFFF));	//isolate 'immediate' and sign extend it
                 	ID_EX.imm = immediate;
                 	ID_EX.A = CURRENT_STATE.REGS[rs];
-                	ID_EX.C = rt;
+			        ID_EX.rd = CURRENT_STATE.REGS[rt];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 0;
+					ID_EX.RegDst = 1;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 			
                 	ID_EX.instruction_type = 2;
                 }
@@ -1104,8 +1249,6 @@ void execute_instruction(uint32_t instruction, int execute_flag){
                 }
                 break;
                 
-
-                
 		case 0xC: //ANDI
             	if(execute_flag == 1){
 	                rs = (binInstruction >> 21) & 0x0000001F;		//isolate rs
@@ -1113,8 +1256,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 	                immediate = binInstruction & 0x0000FFFF;
 	                ID_EX.A = CURRENT_STATE.REGS[rs];
 	                ID_EX.imm = immediate;
-	                ID_EX.C = rt;
-	                ID_EX.instruction_type = 2;
+			        ID_EX.rd = CURRENT_STATE.REGS[rt];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 0;
+					ID_EX.RegDst = 1;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
             	}
             	else if (execute_flag == 1){
 	                EX_MEM.ALUOutput = ID_EX.imm & ID_EX.A;
@@ -1128,8 +1277,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 	                immediate = binInstruction & 0x0000FFFF;
 	                ID_EX.A = CURRENT_STATE.REGS[rs];
 	                ID_EX.imm = immediate;
-	                ID_EX.C = rt;
-	                ID_EX.instruction_type = 2;
+			        ID_EX.rd = CURRENT_STATE.REGS[rt];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 0;
+					ID_EX.RegDst = 1;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
                 }
                 else if (execute_flag == 1){
                 	EX_MEM.ALUOutput = ID_EX.A | (ID_EX.imm);
@@ -1143,8 +1298,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 	                immediate = binInstruction & 0x0000FFFF;
 	                ID_EX.A = CURRENT_STATE.REGS[rs];
 	                ID_EX.imm = immediate;
-	                ID_EX.C = rt;
-	                ID_EX.instruction_type = 2;
+			        ID_EX.rd = CURRENT_STATE.REGS[rt];
+					ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 0;
+					ID_EX.RegDst = 1;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
                 }
                 else if(execute_flag == 1){
                 	EX_MEM.ALUOutput = ID_EX.A ^ ID_EX.imm;
@@ -1158,9 +1319,16 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 	                rt = (binInstruction >> 16) & 0x0000001F;
 	                immediate = (binInstruction & 0x000FFFF);		//isolate the contents of 'immediate'
 	                ID_EX.A = CURRENT_STATE.REGS[rs];
-	                ID_EX.C = rt;
+	                ID_EX.rt = CURRENT_STATE.REGS[rt];
 	                ID_EX.imm = immediate;
-	                ID_EX.instruction_type = 2;
+	                //ID_EX.instruction_type = 2;
+	                ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 0;
+					ID_EX.RegDst = 1;
+					ID_EX.ALUOp = 1;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 0;
 				}
 				else if (execute_flag == 1){
 					if ( (  (int32_t)ID_EX.A - (int32_t)( (ID_EX.imm & 0x8000) > 0 ? (ID_EX.imm | 0xFFFF0000) : (ID_EX.imm & 0x0000FFFF))) < 0){
@@ -1178,9 +1346,17 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 	                rt = (binInstruction >> 16) & 0x0000001F;               //isolate rt
 	                immediate = (binInstruction & 0x000FFFF);		//isolate the contents of 'immediate'
                 	ID_EX.imm = immediate;
-	                ID_EX.C = rt; 
+	                ID_EX.rt =  CURRENT_STATE.REGS[rt]; 
 	                ID_EX.B = CURRENT_STATE.REGS[rs];
-	                ID_EX.instruction_type = 0;
+	                //ID_EX.instruction_type = 0;
+	                ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 1;
+					ID_EX.ALUOp = 0;
+					ID_EX.MemRead = 1;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 1;
+					ID_EX.WBH = 0;
 				}
 				else if (execute_flag == 1){
 					EX_MEM.ALUOutput =   ID_EX.B  + ( (ID_EX.imm & 0x8000) > 0 ? (ID_EX.imm | 0xFFFF0000) : (ID_EX.imm & 0x0000FFFF));
@@ -1200,7 +1376,15 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 	                ID_EX.imm = offset;
 	                ID_EX.C = rt;
 	                ID_EX.B = CURRENT_STATE.REGS[base];
-	                ID_EX.instruction_type = 8;
+	                //ID_EX.instruction_type = 8;
+	                 ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 1;
+					ID_EX.ALUOp = 0;
+					ID_EX.MemRead = 1;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 1;
+					ID_EX.WBH = 2;
 	                
 				}
 				else if (execute_flag == 1){
@@ -1221,7 +1405,15 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 		            ID_EX.imm = offset;
 	                ID_EX.C = rt;
 	                ID_EX.B = CURRENT_STATE.REGS[base];
-	                ID_EX.instruction_type = 7;
+	                //ID_EX.instruction_type = 7;
+	                ID_EX.RegWrite = 1;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 1;
+					ID_EX.ALUOp = 0;
+					ID_EX.MemRead = 1;
+					ID_EX.MemWrite = 0;
+					ID_EX.MemToReg = 1;
+					ID_EX.WBH = 1;
 	                
 				}
 				else if (execute_flag == 1){
@@ -1243,7 +1435,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 	                ID_EX.imm = offset;
 	                ID_EX.A = CURRENT_STATE.REGS[rt]; 
 	                ID_EX.B = CURRENT_STATE.REGS[base];
-	                ID_EX.instruction_type = 1;
+	                //ID_EX.instruction_type = 1;
+	                ID_EX.RegWrite = 0;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 0;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 1;
+					ID_EX.MemToReg = 0;
 				}
              else if (execute_flag == 1){
              	
@@ -1265,7 +1464,14 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 	            ID_EX.imm = offset;
                 ID_EX.A = CURRENT_STATE.REGS[rt]; 
                 ID_EX.B = CURRENT_STATE.REGS[base];
-                ID_EX.instruction_type = 1;
+               // ID_EX.instruction_type = 1;
+                ID_EX.RegWrite = 0;
+				ID_EX.ALUSrc = 1;
+				ID_EX.RegDst = 0;
+				ID_EX.ALUOp = 0;
+				ID_EX.MemRead = 0;
+				ID_EX.MemWrite = 1;
+				ID_EX.MemToReg = 0;
 	            
         	}
         	else if (execute_flag == 1){
@@ -1289,7 +1495,13 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 	                ID_EX.imm = offset;
 	                ID_EX.A = CURRENT_STATE.REGS[rt]; 
 	                ID_EX.B = CURRENT_STATE.REGS[base];
-	                ID_EX.instruction_type = 1;
+					ID_EX.RegWrite = 0;
+					ID_EX.ALUSrc = 1;
+					ID_EX.RegDst = 0;
+					ID_EX.ALUOp = 0;
+					ID_EX.MemRead = 0;
+					ID_EX.MemWrite = 1;
+					ID_EX.MemToReg = 0;
                 }
                 else if (execute_flag == 1){
                 	
@@ -1314,6 +1526,15 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 	                    ID_EX.imm = immediate;
 	                    ID_EX.C = rt;
 	                    ID_EX.instruction_type = 2;
+	                    ID_EX.rt = CURRENT_STATE.REGS[rt];
+						//ID_EX.instruction_type = 2;
+						ID_EX.RegWrite = 1;
+						ID_EX.ALUSrc = 0;
+						ID_EX.RegDst = 1;
+						ID_EX.ALUOp = 1;
+						ID_EX.MemRead = 0;
+						ID_EX.MemWrite = 0;
+						ID_EX.MemToReg = 0;
                     }
                     else if (execute_flag == 1){
                     	EX_MEM.ALUOutput = ID_EX.imm << 16;

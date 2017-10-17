@@ -50,12 +50,23 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	uint32_t IR;
 	uint32_t A;
 	uint32_t B;
-	long int C;
+	uint32_t rt;
+	uint32_t rd;
+//	long int C;
 	uint32_t imm;
 	uint32_t ALUOutput;
 	uint32_t ALUOutput2;
 	uint32_t LMD;
-	uint32_t instruction_type;
+	//uint32_t instruction_type;
+	/****	Control		****/
+	uint32_t RegWrite;	//0=don't write | 1=write
+	uint32_t ALUSrc;	//0=immediate | 1=reg | 2=lo | 3=hi
+	uint32_t RegDst;	//0=rd | 1=rt | 2=mult/div | 2 = mult or div (TA)
+	uint32_t ALUOp;		//0=load/store | 1=ALU operation
+	uint32_t MemRead;	//0=don't read | 1=read
+	uint32_t MemWrite;	//0=don't write | 1=write
+	uint32_t MemToReg;	//0=from ALU | 1=from memory
+	uint32_t WBH; // 0 = W; 1 = H ; 2 = B
 	
 } CPU_Pipeline_Reg;
 
@@ -108,7 +119,3 @@ void initialize();
 void print_program(); /*IMPLEMENT THIS*/
 void execute_instruction(uint32_t instruction, int execute_flag);
 void print_instruction(uint32_t addr);
-
-
-
-

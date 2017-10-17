@@ -1,0 +1,16 @@
+addiu $a0, $zero, 0x0
+addiu $a1, $zero, 0xA
+addiu $a2, $zero, 0x0
+addiu $a3, $zero, 0x1
+addiu $t0, $zero, 0x0
+addiu $t5, $zero, 0x1001
+sll $t5, $t5, 0x04
+sw $a2, 0x0($t5)
+add $t0, $a2, $a3
+add $a2, $zero, $a3
+add $a3, $zero, $t0
+addiu $a0, $a0, 0x1
+addiu $t5, $t5, 0x4
+bne $a0, $a1, 0xFFFA
+addiu $v0, $zero, 0xA
+syscall

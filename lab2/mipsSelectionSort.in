@@ -1,0 +1,53 @@
+addiu $t5, $zero, 0x1001
+sll $t5, $t5, 0x04
+addiu $t6, $zero, 5
+sw $t6, 0x0($t5)
+addiu $t6, $zero, 3
+sw $t6, 0x04($t5)
+addiu $t6, $zero, 6
+sw $t6, 0x08($t5)
+addiu $t6, $zero, 8
+sw $t6, 0x0C($t5)
+addiu $t6, $zero, 9
+sw $t6, 0x10($t5)
+addiu $t6, $zero, 1
+sw $t6, 0x14($t5)
+addiu $t6, $zero, 4
+sw $t6, 0x18($t5)
+addiu $t6, $zero, 7
+sw $t6, 0x1C($t5)
+addiu $t6, $zero, 2
+sw $t6, 0x20($t5)
+addiu $t6, $zero, 10
+sw $t6, 0x24($t5)
+add $t7, $zero, $t5
+addiu $a2, $zero, 0x09 
+addiu $a3, $zero, 0xA 
+addiu $a0, $zero, 0x0
+add $t7, $zero, $t5 
+add $t0, $zero, $t7
+addiu $a1, $a0, 0x01
+lw $t1, 0x0($t7)
+lw $t2, 0x0($t0)
+sub $t3, $t1, $t2
+bltz $t3, 13
+addiu $a1, $a1, 0x01
+addiu $t7, $t7, 0x04
+bne $a1, $a3, 0xFFFA
+bne $a0, $t2, 6
+addiu $a0, $zero, 0x01
+addiu $t5, $t5, 0x4
+bne $a0, $a2, 0xFFF5
+addiu $v0, $zero, 0xA								
+syscall 
+sw $t1, 0x0($t0)
+sw $t2, 0x0($t7)
+j oxFFF9
+add $t0, $zero, $t7
+j 0xFFF3
+
+
+
+
+
+
