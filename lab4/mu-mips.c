@@ -728,6 +728,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 		switch(instruction){//case statement for right
 			//ADD
 			case 0x20:
+			printf("ADD\n");
 				if(execute_flag == 0){
 					binInstruction = binInstruction >> 11;
 					rd = binInstruction & 0x001F;
@@ -759,6 +760,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 				break;
 			//ADDU		
 			case 0x21:
+			printf("ADDU\n");
 				if(execute_flag == 0){
 					binInstruction = binInstruction >> 11;
 					rd = binInstruction & 0x001F;
@@ -787,6 +789,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 				break;
 			//AND 
 			case 0x24:
+			printf("AND\n");
 				if(execute_flag == 0){
 					binInstruction = binInstruction >> 11;
 					rd = binInstruction & 0x001F;
@@ -816,6 +819,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 				break;
 			//SUB 
 			case 0x22: 
+			printf("SUB\n");
 				if(execute_flag == 0){
 					binInstruction = binInstruction >> 11;
 					rd = binInstruction & 0x001F;
@@ -845,6 +849,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 				
 			//SUBU 
 			case 0x23:
+			printf("subu\n");
 				if (execute_flag == 0){
 					binInstruction = binInstruction >> 11;
 					rd = binInstruction & 0x001F;
@@ -877,6 +882,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 				break;
 		//MULT 
 			case 0x18:
+			printf("mult\n");
 				if(execute_flag == 0){
 					//int64_t tempMult;
 					binInstruction = binInstruction >> 16;
@@ -925,6 +931,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 				break;
 			//MULTU needs work
 			case 0x19:
+			printf("multu\n");
 				//uint64_t tempMultU;
 				if(execute_flag == 0){
 					binInstruction = binInstruction >> 16;
@@ -1331,7 +1338,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 		}
 	}
 	else if ((flag)){
-		long int immediate;
+		unsigned int immediate;
 		switch(instruction){
 			case 0x8: //ADDI
 		        /* The 16-bit immediate is sign-extended and added to the contents of general
@@ -1346,7 +1353,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 			        rt = (binInstruction >> 16) & 0x0000001F;
 			        rs = (binInstruction >> 21) & 0x0000001F;
 			        ID_EX.A = CURRENT_STATE.REGS[rs];
-			        ID_EX.imm = CURRENT_STATE.REGS[immediate];
+			        ID_EX.imm = immediate;
 			        ID_EX.rt = CURRENT_STATE.REGS[rt];
 			        ID_EX.RegisterRd = 0;
 					ID_EX.RegisterRt = rt;
