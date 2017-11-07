@@ -75,7 +75,7 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	
 	
 } CPU_Pipeline_Reg;
-
+int branch_jump;
 /***************************************************************/
 /* CPU State info.                                                                                                               */
 /***************************************************************/
