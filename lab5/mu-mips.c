@@ -620,33 +620,30 @@ void ID()
 					
 					stall = 1;
 				}
-		}
-		else if (EX_MEM.RegDst == 1){//rt destination 
-			if(((EX_MEM.RegWrite == 1) && (EX_MEM.RegisterRt != 0)) && (EX_MEM.RegisterRt == ID_EX.RegisterRs)){
-				   
+			}
+			else if (EX_MEM.RegDst == 1){//rt destination 
+				if(((EX_MEM.RegWrite == 1) && (EX_MEM.RegisterRt != 0)) && (EX_MEM.RegisterRt == ID_EX.RegisterRs)){
+					   
 					stall = 2;
-				    
-				}
-			if(((EX_MEM.RegWrite == 1) && (EX_MEM.RegisterRt != 0)) && (EX_MEM.RegisterRt == ID_EX.RegisterRt)){
-				    
+					    
+					}
+				if(((EX_MEM.RegWrite == 1) && (EX_MEM.RegisterRt != 0)) && (EX_MEM.RegisterRt == ID_EX.RegisterRt)){
+					    
 					stall = 2;
-				    
-				}
-			if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRt != 0)) && (MEM_WB.RegisterRt == ID_EX.RegisterRs)){
-				    //stall
-				
+					    
+					}
+				if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRt != 0)) && (MEM_WB.RegisterRt == ID_EX.RegisterRs)){
+					    //stall
+					
+					stall = 1;
+					}
+				if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRt != 0)) && (MEM_WB.RegisterRt == ID_EX.RegisterRt)){
+					    //stall
+					
 					stall = 1;
 				}
-			if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRt != 0)) && (MEM_WB.RegisterRt == ID_EX.RegisterRt)){
-				    //stall
-				
-					stall = 1;
-				}
+			}
 		}
-
-	
-		
-	}
     }
     if(MEM_WB.Branch == 1 && MEM_WB.ALUOp == 2){
 	printf("stalling for a branch\n");
@@ -679,7 +676,6 @@ void ID()
 		ID_EX.PC = IF_ID.PC;
 		}
 	else{
-		
 		ID_EX.IR = 00000000;
 		ID_EX.A = 0;
 		ID_EX.B = 0;
@@ -739,15 +735,11 @@ void IF()
 	}
 	else{// stall has occured
 		stall = stall - 1;
-		
-		
+
 		if (stall != 0){
-			
 			stallNum = stallNum + 1;
 		}
 	}
-	
-	
 }
 
 
@@ -908,19 +900,19 @@ uint32_t convertInstruction(uint32_t value){
 	right = right >> 26;
 	uint32_t left = value >> 26;
 	
-        if ((left & 0x3F) != 0){
-            flag=1;
-            return left;
+    if ((left & 0x3F) != 0){
+        flag=1;
+        return left;
 	}
 	else if (((right & 0x3F) != 0) && ((left & 0x3F) == 0)){//I changed these from FF to 3F
 		flag = 0;
 		return right;
 	}
-        else if (right == 0){
-            return right;
-        }
-        
-        return 0xFF;
+    else if (right == 0){
+        return right;
+    }
+    
+    return 0xFF;
 }
 
 void execute_instruction(uint32_t instruction, int execute_flag){
@@ -932,7 +924,6 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 
 	binInstruction = instruction;
 	instruction = convertInstruction(instruction);
-	
                 
 	if(flag==0){ //If flag is set = instruction is 'left'
 		
