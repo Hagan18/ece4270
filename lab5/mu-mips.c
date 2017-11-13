@@ -339,7 +339,8 @@ void handle_pipeline()
 void WB()//TA told us to update current state not next state, but updating current state, we never moved through the program
 {
 	
-	
+		printf("in wb: ");
+		print_instruction(MEM_WB.PC); 
 	
 
 		if (MEM_WB.RegDst == 1 && MEM_WB.ALUOp == 0 && MEM_WB.ALUSrc == 1 && MEM_WB.MemRead == 1 && MEM_WB.MemWrite == 0 && MEM_WB.RegWrite == 1 && MEM_WB.MemToReg == 1) {//load
@@ -402,6 +403,8 @@ void WB()//TA told us to update current state not next state, but updating curre
 void MEM()
 {
 		
+		printf("in mem: ");
+		print_instruction(EX_MEM.PC); 
 		
 		//load
 		
@@ -418,7 +421,7 @@ void MEM()
 		}
 	
 		if (EX_MEM.ALUOp == 0 && EX_MEM.ALUSrc == 1 && EX_MEM.MemRead == 0 && EX_MEM.MemWrite == 1 && EX_MEM.RegWrite == 0){//store
-			
+			printf("\nwriting 0x%x, to 0x%0x\n\n", EX_MEM.A, EX_MEM.ALUOutput);
 			mem_write_32(EX_MEM.ALUOutput, EX_MEM.A);
 		}
 
@@ -451,14 +454,16 @@ void MEM()
 /* execution (EX) pipeline stage:                           */ 
 /************************************************************/
 void EX()
-{
-	
+{	
+			
+		printf("in ex: ");
+		print_instruction(ID_EX.PC); 
 		
 			EX_MEM.IR = ID_EX.IR;
 			execute_instruction(ID_EX.IR, 1);
 		
 		  
-		
+			EX_MEM.IR = ID_EX.IR;
 			EX_MEM.A = ID_EX.A;
 			EX_MEM.B = ID_EX.B;
 			// EX_MEM.C = ID_EX.C;
@@ -491,10 +496,13 @@ void EX()
 void ID()
 {
 	
+		printf("in id: ");
+		print_instruction(IF_ID.PC); 
+	
 	if(stall == 0){
 		/*IMPLEMENT THIS*/
 		execute_instruction(IF_ID.IR, 0);
-		if(ENABLE_FORWARDING){
+		/*if(ENABLE_FORWARDING){
 				if(EX_MEM.RegDst == 0){//rd is destination
 					if((EX_MEM.RegWrite == 1 && (EX_MEM.RegisterRd != 0)) && (EX_MEM.RegisterRd == ID_EX.RegisterRs)){
 					    //forwardA = 10
@@ -552,11 +560,10 @@ void ID()
 				    FORWARD_FLAG_B = 01;
 			    	}
 			    }
-	}
+	
 
 
 
-/****************************************************************************************************************************************************************************/
 
 
 
@@ -589,16 +596,18 @@ void ID()
 			
 		}
 
+	}
 
-
-
+*/
 
 	    if (!ENABLE_FORWARDING){
 			if(EX_MEM.ALUOp == 2){//stall once regardless of the branch is taken or not
 				stall = 1;
+				printf("STALLING FOR BRANCH\n");
 			}	
 		
 			if (EX_MEM.RegDst == 0){//rd destination
+				printf("EX_MEM.RegisterRd: 0x%x, ID_EX.RegisterRs 0x%x\n", EX_MEM.RegisterRd, ID_EX.RegisterRs);
 
 				if(((EX_MEM.RegWrite == 1) && (EX_MEM.RegisterRd != 0)) && (EX_MEM.RegisterRd == ID_EX.RegisterRs)){
 				   
@@ -622,6 +631,7 @@ void ID()
 				}
 			}
 			else if (EX_MEM.RegDst == 1){//rt destination 
+				printf("EX_MEM.RegisterRt: 0x%x, ID_EX.RegisterRs 0x%x, ID_EX.RegisterRt 0x%x\n", EX_MEM.RegisterRt, ID_EX.RegisterRs, ID_EX.RegisterRt);
 				if(((EX_MEM.RegWrite == 1) && (EX_MEM.RegisterRt != 0)) && (EX_MEM.RegisterRt == ID_EX.RegisterRs)){
 					   
 					stall = 2;
@@ -642,40 +652,22 @@ void ID()
 					
 					stall = 1;
 				}
+			//if (ID_EX.ALUOp == 0 && ID_EX.ALUSrc == 1 && ID_EX.MemRead == 0 && EX_MEM.MemWrite == 1 && EX_MEM.RegWrite == 0 && ){//checking to make sure we aren't storing a value that isn't in reg yet
+					//if (EX_MEM.RegisterRt == ID_EX.RegisterRt){
+					//	stall = 2;
+			
 			}
-		}
+			
+		}	
+		
     }
-    if(MEM_WB.Branch == 1 && MEM_WB.ALUOp == 2){
-	printf("stalling for a branch\n");
-    	ID_EX.IR = 00000000;
-		ID_EX.A = 0;
-		ID_EX.B = 0;
-		ID_EX.PC = 0;
-		ID_EX.ALUSrc = 0;
-		ID_EX.imm = 0;
-		ID_EX.ALUOutput = 0;
-		ID_EX.ALUOutput2 = 0;
-		ID_EX.ALUSrc = 0;
-		ID_EX.RegWrite = 0;
-		ID_EX.RegDst = 0;
-		ID_EX.ALUOp = 0;
-		ID_EX.MemRead = 0;
-		ID_EX.MemWrite = 0;
-		ID_EX.MemToReg = 0;
-		ID_EX.WBH = 0;
-		ID_EX.RegisterRs = 0;
-		ID_EX.RegisterRt = 0;
-		ID_EX.RegisterRd = 0;
-		ID_EX.rt = 0;
-		ID_EX.rd = 0;
-		ID_EX.instruction_type = 0;
-		ID_EX.Branch = 0;
-    }
-	else if (stall == 0){
+    
+	if (stall == 0){
 		ID_EX.IR = IF_ID.IR;
 		ID_EX.PC = IF_ID.PC;
 		}
 	else{
+		printf("STALLING\n");
 		ID_EX.IR = 00000000;
 		ID_EX.A = 0;
 		ID_EX.B = 0;
@@ -715,7 +707,7 @@ void IF()
 	if(stall == 0){//no stall has occured
 		/*IMPLEMENT THIS*/
 		IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
-		
+		//printf("Instruction in if: 0x%x\n", IF_ID.PC);
 		
 		if (SYSCALL_FLAG == 1){//are not incrementing the program counter after there is a syscall
 		}
@@ -723,12 +715,14 @@ void IF()
 			if(MEM_WB.Branch == 1 && MEM_WB.ALUOp == 2){
 				printf("updating PC based on branch/jump\n");
 				CURRENT_STATE.PC = EX_MEM.ALUOutput;
+				IF_ID.PC = CURRENT_STATE.PC;
 				printf("ALU Output: 0x%x\n\n", CURRENT_STATE.PC);
 			}
 			else{
+				IF_ID.PC = CURRENT_STATE.PC;
 				CURRENT_STATE.PC = CURRENT_STATE.PC + 4;
 			}
-			IF_ID.PC = CURRENT_STATE.PC;
+			
 			IF_ID.Branch = 0;
 		}
 	
@@ -2127,18 +2121,21 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 
 			case 0x2B: //SW
 				
-				if (execute_flag == 0){
+			if (execute_flag == 0){
 					
-	                offset =  binInstruction & 0x0FFFF; 
-	                binInstruction = binInstruction >> 16;
-	                rt = binInstruction & 0x001F;
-	                binInstruction = binInstruction >> 5;
-	                base = binInstruction & 0x001F;
-	                ID_EX.imm = offset;
-	                ID_EX.A = CURRENT_STATE.REGS[rt]; 
-	                ID_EX.B = CURRENT_STATE.REGS[base];
-	                ID_EX.RegisterRd = 0;
+			        offset =  binInstruction & 0x0FFFF; 
+			        binInstruction = binInstruction >> 16;
+			        rt = binInstruction & 0x001F;
+			        binInstruction = binInstruction >> 5;
+			        base = binInstruction & 0x001F;
+			        ID_EX.imm = offset;
+			
+			        ID_EX.A = CURRENT_STATE.REGS[rt]; 
+			        ID_EX.B = CURRENT_STATE.REGS[base];
+			        ID_EX.RegisterRd = 0;
 					ID_EX.RegisterRt = rt;
+					
+					printf("base in ex SW: 0x%x\n", CURRENT_STATE.REGS[base]);
 					ID_EX.RegisterRs = 0;
 		        		ID_EX.RegWrite = 0;
 					ID_EX.ALUSrc = 1;
@@ -2147,10 +2144,12 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					ID_EX.MemRead = 0;
 					ID_EX.MemWrite = 1;
 					ID_EX.MemToReg = 0;
-				}
+				printf("register Rt in ex SW: 0x%x\n", ID_EX.RegisterRt);
+			}
 	            else if (execute_flag == 1){
-	             	
+	             	printf("register rt before execution: 0x%x\n", ID_EX.RegisterRt);
 	             	EX_MEM.ALUOutput = ID_EX.B + ( ( ID_EX.imm  & 0x8000) > 0 ? ( ID_EX.imm  | 0xFFFF0000) : ( ID_EX.imm  & 0x0000FFFF));
+			printf("alu op in sw execute: 0x%x \n", EX_MEM.ALUOutput);
 					//mem_write_32(addr, ID_EX.A);
 	             }
             	else{ 
