@@ -619,16 +619,19 @@ void ID()
 					
 					stall = 2;
 				}
+			}
+			else if (EX_MEM.RegDst == 0){
 				if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRd != 0)) && (MEM_WB.RegisterRd == ID_EX.RegisterRs)){
 				    //stall
-				
+			
 					stall = 1;
 				}
 				if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRd != 0)) && (MEM_WB.RegisterRd == ID_EX.RegisterRt)){
 				    //stall
-					
+				
 					stall = 1;
 				}
+			
 			}
 			else if (EX_MEM.RegDst == 1){//rt destination 
 				printf("EX_MEM.RegisterRt: 0x%x, ID_EX.RegisterRs 0x%x, ID_EX.RegisterRt 0x%x\n", EX_MEM.RegisterRt, ID_EX.RegisterRs, ID_EX.RegisterRt);
@@ -642,16 +645,19 @@ void ID()
 					stall = 2;
 					    
 					}
+			}
+			else if (MEM_WB.RegDst == 1){
 				if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRt != 0)) && (MEM_WB.RegisterRt == ID_EX.RegisterRs)){
 					    //stall
-					
+				
 					stall = 1;
 					}
 				if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRt != 0)) && (MEM_WB.RegisterRt == ID_EX.RegisterRt)){
 					    //stall
-					
+				
 					stall = 1;
-				}
+				}	
+				
 			//if (ID_EX.ALUOp == 0 && ID_EX.ALUSrc == 1 && ID_EX.MemRead == 0 && EX_MEM.MemWrite == 1 && EX_MEM.RegWrite == 0 && ){//checking to make sure we aren't storing a value that isn't in reg yet
 					//if (EX_MEM.RegisterRt == ID_EX.RegisterRt){
 					//	stall = 2;
@@ -1528,6 +1534,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 		            binInstruction = binInstruction >> 5;
 		            rt = binInstruction & 0x01F;
 		            ID_EX.A = sa;
+				ID_EX.imm = sa;
 		            ID_EX.B = CURRENT_STATE.REGS[rt];
 		            ID_EX.rd = CURRENT_STATE.REGS[rd];
 		            ID_EX.RegisterRd = rd;
@@ -1542,7 +1549,9 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					ID_EX.MemToReg = 0;
 	        	}
 	        	else if (execute_flag == 1){
-	            	EX_MEM.ALUOutput = ID_EX.B >> ID_EX.A;
+				printf("shifting ID_EX.B: 0x%x (ID_EX.A) 0x%x times\n",ID_EX.B,ID_EX.A); 
+	            		EX_MEM.ALUOutput = ID_EX.B >> ID_EX.A;
+				printf("\nALU Output in srl: 0x%x\n\n", EX_MEM.ALUOutput);
 	        	}
 	        	else printf("Execute flag error SRL\n");
 	        	break;
@@ -2133,17 +2142,17 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 			        ID_EX.A = CURRENT_STATE.REGS[rt]; 
 			        ID_EX.B = CURRENT_STATE.REGS[base];
 			        ID_EX.RegisterRd = 0;
-					ID_EX.RegisterRt = rt;
-					
-					printf("base in ex SW: 0x%x\n", CURRENT_STATE.REGS[base]);
-					ID_EX.RegisterRs = 0;
-		        		ID_EX.RegWrite = 0;
-					ID_EX.ALUSrc = 1;
-					ID_EX.RegDst = 0;
-					ID_EX.ALUOp = 0;
-					ID_EX.MemRead = 0;
-					ID_EX.MemWrite = 1;
-					ID_EX.MemToReg = 0;
+				ID_EX.RegisterRt = rt;
+				printf("base in ex SW: 0x%x\n", CURRENT_STATE.REGS[base]);
+				ID_EX.RegisterRs = 0;
+
+	        		ID_EX.RegWrite = 0;
+				ID_EX.ALUSrc = 1;
+				ID_EX.RegDst = 0;
+				ID_EX.ALUOp = 0;
+				ID_EX.MemRead = 0;
+				ID_EX.MemWrite = 1;
+				ID_EX.MemToReg = 0;
 				printf("register Rt in ex SW: 0x%x\n", ID_EX.RegisterRt);
 			}
 	            else if (execute_flag == 1){
