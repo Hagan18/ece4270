@@ -727,7 +727,7 @@ void IF()
 			if(MEM_WB.Branch == 1 && MEM_WB.ALUOp == 2){
 				printf("updating PC based on branch/jump\n");
 				CURRENT_STATE.PC = EX_MEM.ALUOutput;
-				printf("ALU Output: 0x%x\n\n", MEM_WB.ALUOutput);
+				printf("ALU Output: 0x%x\n\n", CURRENT_STATE.PC);
 			}
 			else{
 				CURRENT_STATE.PC = CURRENT_STATE.PC + 4;
