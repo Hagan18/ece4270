@@ -129,7 +129,7 @@ void initialize();
 void print_program(); /*IMPLEMENT THIS*/
 void execute_instruction(uint32_t instruction, int execute_flag);
 void print_instruction(uint32_t addr);
-
+void writeToBuffer(uint32_t *buffer, int tag, int index);
 
 
 

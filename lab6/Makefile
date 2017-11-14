@@ -1,5 +1,5 @@
 mu-mips: mu-mips.c
-	gcc -Wall -g -O2 $^ -o $@
+	gcc -g -O2 $^ -o $@
 
 .PHONY: clean
 clean:

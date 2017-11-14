@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <assert.h>
-
+#include "mu-cache.h"
 #include "mu-mips.h"
 int ENABLE_FORWARDING = 0;
 int branchStalled = 0;
@@ -414,14 +414,38 @@ void WB()//TA told us to update current state not next state, but updating curre
 /************************************************************/
 void MEM()
 {
-		
-	
+		//uint32_t index;
+		int word_offset;
+		int index;
+		int tag;
+		uint32_t address;
+		uint32_t write_buffer[4];
+		int i;
 	
 	//load
 	
 	if ((EX_MEM.RegDst == 1) && (EX_MEM.ALUOp == 0) && (EX_MEM.ALUSrc == 1) && (EX_MEM.MemRead == 1) && (EX_MEM.MemWrite == 0) && (EX_MEM.RegWrite == 1) && (EX_MEM.MemToReg == 1))  {//load
-	
-		MEM_WB.LMD = mem_read_32(EX_MEM.ALUOutput);
+		
+		word_offset = (EX_MEM.ALUOutput >> 2) & 0x03;
+		index = (EX_MEM.ALUOutput >> 4) & 0x0F;
+		tag = (EX_MEM.ALUOutput >> 8) & 0x0FFFFF;
+		
+		if ((L1Cache.blocks[index].tag == tag) && (L1Cache.blocks[index].valid == 1)){//hit
+			MEM_WB.LMD = L1Cache.blocks[index].words[word_offset];
+			cache_hits += 1;
+		}
+		else{
+			for (i = 0; i < WORD_PER_BLOCK; i++){//read a whole block in from memory
+				address  = (tag << 8) | (index << 4)|(i*4);
+				printf("address: 0x%x\n", address);
+				L1Cache.blocks[index].words[i] = mem_read_32(address);
+			}
+			MEM_WB.LMD = L1Cache.blocks[index].words[word_offset];
+			stall = 100;
+			cache_misses += 1;
+			L1Cache.blocks[index].valid = 1;
+		}
+		
 		
 		if (EX_MEM.WBH == 1){//LH
 			MEM_WB.LMD = ((MEM_WB.LMD & 0x0000FFFF) & 0x8000) > 0 ? (MEM_WB.LMD | 0xFFFF0000) : (MEM_WB.LMD & 0x0000FFFF);
@@ -432,11 +456,36 @@ void MEM()
 	}
 
 	if (EX_MEM.ALUOp == 0 && EX_MEM.ALUSrc == 1 && EX_MEM.MemRead == 0 && EX_MEM.MemWrite == 1 && EX_MEM.RegWrite == 0){//store
-		
-		mem_write_32(EX_MEM.ALUOutput, EX_MEM.A);
+		if (L1Cache.blocks[index].tag == tag && L1Cache.blocks[index].valid == 1 ){//hit
+			L1Cache.blocks[index].words[word_offset] = EX_MEM.A;
+			//L1Cache.blocks[index].valid = 1;
+			write_buffer[word_offset] = L1Cache.blocks[index].words[word_offset];
+			cache_hits += 1;
+		}
+		else{
+			for (i = 0; i < WORD_PER_BLOCK; i++){//read a whole block in from memory
+				address  = (tag << 8) | (index << 4)|(i*4);
+				printf("address: 0x%x\n", address);
+				L1Cache.blocks[index].words[i] = mem_read_32(address);
+				write_buffer[i] = L1Cache.blocks[index].words[i];
+			}
+			
+			L1Cache.blocks[index].words[word_offset] = EX_MEM.A;
+			L1Cache.blocks[index].valid = 1;
+			stall = 100;
+			cache_misses += 1;
+		}
+		//mem_write_32(EX_MEM.ALUOutput, EX_MEM.A);
 	}
-
-
+	//int i, j;
+	// for(i = 0; i < NUM_CACHE_BLOCKS; i++){
+	// 	for (j = 0; j < WORD_PER_BLOCK; j++){
+	// 		if (L1Cache.blocks[i].words[j] == ) ;
+	// 	}
+	// }
+	 writeToBuffer(write_buffer, tag, index);
+	//if cache miss on load/store  takes 100 cycles
+	
 	MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 	MEM_WB.ALUOutput2 = EX_MEM.ALUOutput2;
 	MEM_WB.A = EX_MEM.A;
@@ -911,6 +960,16 @@ void show_pipeline(){
 	printf("MEM_WB.MemWrite: %x\n",MEM_WB.MemWrite);
 	printf("MEM_WB.MemToReg: %x\n",MEM_WB.MemToReg);
 	printf("MEM_WB.WBH: %x\n",MEM_WB.WBH);
+}
+
+void writeToBuffer (uint32_t *buffer, int tag, int index){
+	int i;
+	uint32_t address;
+	
+	for (i = 0; i < WORD_PER_BLOCK; i++){
+		address  = (tag << 8) | (index << 4)|(i*4);
+		mem_write_32(adress, buffer[i]);
+	}
 }
 
 /***************************************************************/
