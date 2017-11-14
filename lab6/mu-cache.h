@@ -21,7 +21,7 @@ typedef struct Cache_Struct {
 } Cache;
 
 
-void writeToBuffer (int32_t *buffer, int tag, int index);
+//void writeToBuffer (int32_t *buffer, int tag, int index);
 
 /***************************************************************/
 /* CACHE STATS                                                 */

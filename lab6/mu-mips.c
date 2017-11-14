@@ -968,7 +968,7 @@ void writeToBuffer (uint32_t *buffer, int tag, int index){
 	
 	for (i = 0; i < WORD_PER_BLOCK; i++){
 		address  = (tag << 8) | (index << 4)|(i*4);
-		mem_write_32(adress, buffer[i]);
+		mem_write_32(address, buffer[i]);
 	}
 }
 
