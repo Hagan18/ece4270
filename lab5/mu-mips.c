@@ -341,8 +341,8 @@ void handle_pipeline()
 void WB()//TA told us to update current state not next state, but updating current state, we never moved through the program
 {
 	
-		printf("in wb: ");
-		print_instruction(MEM_WB.PC);
+		
+		
 	
 		if (MEM_WB.RegDst == 1 && MEM_WB.ALUOp == 0 && MEM_WB.ALUSrc == 1 && MEM_WB.MemRead == 1 && MEM_WB.MemWrite == 0 && MEM_WB.RegWrite == 1 && MEM_WB.MemToReg == 1) {//load
 				
@@ -402,8 +402,7 @@ void WB()//TA told us to update current state not next state, but updating curre
 			RUN_FLAG = FALSE;
 			//(CURRENT_STATE.PC);
 			}
-			else
-				printf("SYSCALL error\n");
+			
 		}
 	
 		INSTRUCTION_COUNT++;
@@ -416,8 +415,7 @@ void WB()//TA told us to update current state not next state, but updating curre
 void MEM()
 {
 		
-	printf("in mem: ");
-	print_instruction(EX_MEM.PC); 
+	
 	
 	//load
 	
@@ -434,7 +432,7 @@ void MEM()
 	}
 
 	if (EX_MEM.ALUOp == 0 && EX_MEM.ALUSrc == 1 && EX_MEM.MemRead == 0 && EX_MEM.MemWrite == 1 && EX_MEM.RegWrite == 0){//store
-		printf("\nwriting 0x%x, to 0x%0x\n\n", EX_MEM.A, EX_MEM.ALUOutput);
+		
 		mem_write_32(EX_MEM.ALUOutput, EX_MEM.A);
 	}
 
@@ -470,8 +468,7 @@ void MEM()
 void EX()
 {	
 			
-		printf("in ex: ");
-		print_instruction(ID_EX.PC); 
+		
 		
 			//EX_MEM.IR = ID_EX.IR;
 			execute_instruction(ID_EX.IR, 1);
@@ -499,9 +496,6 @@ void EX()
 			EX_MEM.instruction_type = ID_EX.instruction_type;
 			//EX_MEM.Branch = ID_EX.Branch;
 			//EX_MEM.ALUOutput = 0;
-			if (EX_MEM.Branch == 1){
-				//printf("\tBRANCH SHOULD BE HAPPENING\n");
-			}
 				
 			
 }
@@ -510,18 +504,13 @@ void EX()
 /* instruction decode (ID) pipeline stage:                  */ 
 /************************************************************/
 void ID()
-{
-	
-		printf("in id: ");
-		print_instruction(IF_ID.PC); 
-		//printf("ID_EX.RegisterRt: %x, EX_MEM.RegisterRt: %x\n",ID_EX.RegisterRt, EX_MEM.RegisterRt);
-	
+{	
 	if(stall == 0){
 		/*IMPLEMENT THIS*/
-		printf("IR in ID = 0x%x\n",IF_ID.IR); 
+		
 		execute_instruction(IF_ID.IR, 0);
-		//printf("ID_EX.RegisterRt: %x, EX_MEM.RegisterRt: %x\n",ID_EX.RegisterRt, EX_MEM.RegisterRt);
-		/*if(ENABLE_FORWARDING){
+		
+		if(ENABLE_FORWARDING){
 				if(EX_MEM.RegDst == 0){//rd is destination
 					if((EX_MEM.RegWrite == 1 && (EX_MEM.RegisterRd != 0)) && (EX_MEM.RegisterRd == ID_EX.RegisterRs)){
 					    //forwardA = 10
@@ -617,16 +606,16 @@ void ID()
 
 	}
 
-*/
+	if (branchStalled == 1){
+		stall = 1;
+	}
 	
 
 	    if (!ENABLE_FORWARDING){
-			if (branchStalled == 1){
-				stall = 1;
-			}
+			
 			
 			if (EX_MEM.RegDst == 0){//rd destination
-				//printf("EX_MEM.RegisterRd: 0x%x, ID_EX.RegisterRs 0x%x\n", EX_MEM.RegisterRd, ID_EX.RegisterRs);
+				
 
 				if(((EX_MEM.RegWrite == 1) && (EX_MEM.RegisterRd != 0)) && (EX_MEM.RegisterRd == ID_EX.RegisterRs)){
 				   
@@ -652,14 +641,14 @@ void ID()
 				}
 			}
 			else if (EX_MEM.RegDst == 1){//rt destination 
-				//printf("EX_MEM.RegisterRt: 0x%x, ID_EX.RegisterRs 0x%x, ID_EX.RegisterRt 0x%x\n", EX_MEM.RegisterRt, ID_EX.RegisterRs, ID_EX.RegisterRt);
+				
 				if(((EX_MEM.RegWrite == 1) && (EX_MEM.RegisterRt != 0)) && (EX_MEM.RegisterRt == ID_EX.RegisterRs)){
-					printf("stall 2x\n");
+					
 					stall = 2;
 				
 				}
 				if(((EX_MEM.RegWrite == 1) && (EX_MEM.RegisterRt != 0)) && (EX_MEM.RegisterRt == ID_EX.RegisterRt)){
-					printf("---------stalling twice\n");
+					
 					stall = 2;
 					    
 				}
@@ -667,12 +656,12 @@ void ID()
 			else if (MEM_WB.RegDst == 1){
 				if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRt != 0)) && (MEM_WB.RegisterRt == ID_EX.RegisterRs)){
 					    //stall
-					printf("stall 1x\n");
+					
 					stall = 1;
 					}
 				if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRt != 0)) && (MEM_WB.RegisterRt == ID_EX.RegisterRt)){
 					    //stall
-					printf("----------Stalling once\n");
+					
 					stall = 1;
 				}	
 
@@ -681,26 +670,26 @@ void ID()
 					//if (EX_MEM.RegisterRt == ID_EX.RegisterRt){
 					//	stall = 2;
 			}
-			if(ID_EX.ALUOp == 2 && branchStalled == 0 && stall == 0){//stall once regardless of the branch is taken or not
-				//stall = 1;
-				branchStalled = 1;
-				printf("\nBranch is in ID\n\n");
 				
-			}
-			else{
-				branchStalled = 0;
-			}	
 		
 		}	
     }
-    
+
+	if(ID_EX.ALUOp == 2 && branchStalled == 0 && stall == 0){//stall once regardless of the branch is taken or not
+		
+		branchStalled = 1;
+	}
+	else{
+		branchStalled = 0;
+	}
+
 	if (stall == 0){
 		ID_EX.IR = IF_ID.IR;
 		ID_EX.PC = IF_ID.PC;
 	}
-	
+
 	else{
-		printf("STALLING\n");
+		
 		ID_EX.IR = 00000000;
 		ID_EX.A = 0;
 		ID_EX.B = 0;
@@ -726,7 +715,7 @@ void ID()
 		ID_EX.Branch = 0;
 	}	
 	 if (MEM_WB.Branch == 1 && MEM_WB.ALUOp == 2){//could be mem WB
-		printf("FLUSH\n");
+		
 		ID_EX.IR = 00000000;
 		ID_EX.A = 0;
 		ID_EX.B = 0;
@@ -760,7 +749,7 @@ void ID()
 /************************************************************/
 void IF()
 {
-	printf("Stall in IF = %d\n", stall);
+	
 	
 	if(stall == 0 ){//no stall has occured
 		if (branchStalled == 1){
@@ -778,13 +767,13 @@ void IF()
 			}
 			else {
 				if(MEM_WB.Branch == 1 && MEM_WB.ALUOp == 2){
-					printf("updating PC based on branch/jump\n");
+					
 					CURRENT_STATE.PC = MEM_WB.ALUOutput;
 					IF_ID.PC = CURRENT_STATE.PC;
-					printf("ALU Output: 0x%x\n\n", MEM_WB.ALUOutput);
+					
 				}
 				else{	
-					printf("updating PC based +4\n");
+					
 					CURRENT_STATE.PC = NS;
 					IF_ID.PC = CURRENT_STATE.PC;
 				
@@ -1639,9 +1628,9 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					ID_EX.MemToReg = 0;
 	        	}
 	        	else if (execute_flag == 1){
-				printf("shifting ID_EX.B: 0x%x (ID_EX.A) 0x%x times\n",ID_EX.B,ID_EX.A); 
+				
 	            		EX_MEM.ALUOutput = ID_EX.B >> ID_EX.A;
-				printf("\nALU Output in srl: 0x%x\n\n", EX_MEM.ALUOutput);
+				
 	        	}
 	        	else printf("Execute flag error SRL\n");
 	        	break;
@@ -1667,7 +1656,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					NEXT_STATE.REGS[ID_EX.RegisterRd] = CURRENT_STATE.PC + 4;
 					EX_MEM.ALUOutput = CURRENT_STATE.REGS[ID_EX.RegisterRs];
 					branch_jump = TRUE;
-					print_instruction(EX_MEM.PC);
+					//print_instruction(EX_MEM.PC);
 				}
 				else printf("Execute flag error JALR\n");
 				break;
@@ -1694,7 +1683,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 				else if(execute_flag == 1){
 					EX_MEM.ALUOutput = ID_EX.A;
 					branch_jump = TRUE;
-					print_instruction(EX_MEM.PC);
+					//print_instruction(EX_MEM.PC);
 				}
 				else printf("Execute flag error JR\n");
 				break;
@@ -1748,7 +1737,11 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 							EX_MEM.ALUOutput = ID_EX.PC + ( (ID_EX.imm & 0x8000) > 0 ? (ID_EX.imm | 0xFFFF0000)<<2 : (ID_EX.imm & 0x0000FFFF)<<2);
 							EX_MEM.Branch = 1;
 							branch_jump = TRUE;
-							print_instruction(EX_MEM.PC);
+							//print_instruction(EX_MEM.PC);
+						}
+						else{
+							EX_MEM.Branch = 0;
+							EX_MEM.ALUOutput = 0;
 						}
 					}
 					else printf("Execute flag error BLTZ\n");
@@ -1775,10 +1768,13 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 							EX_MEM.ALUOutput = ID_EX.PC + ( (ID_EX.imm & 0x8000) > 0 ? (ID_EX.imm | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
 							branch_jump = TRUE;
 							EX_MEM.Branch = 1;
-							printf("EX_MEM.ALUOutput for BGEZ: 0x%x\n",EX_MEM.ALUOutput);
 							
 						}
-					print_instruction(EX_MEM.PC);
+						else{
+						EX_MEM.Branch = 0;
+						EX_MEM.ALUOutput = 0;
+						}
+					//print_instruction(EX_MEM.PC);
 					}
 					else printf("Execute flag error BGEZ\n");
 				}	
@@ -1805,7 +1801,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					EX_MEM.ALUOutput = (ID_EX.PC & 0xF0000000) | (ID_EX.imm << 2);
 					branch_jump = TRUE;
 					EX_MEM.Branch = 1;
-					print_instruction(EX_MEM.PC);
+					//print_instruction(EX_MEM.PC);
 				}
 				else printf("Execute flag error Jump\n");	
 				break;
@@ -1830,10 +1826,10 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					}
 				else if(execute_flag == 1){
 					EX_MEM.ALUOutput = (ID_EX.PC & 0xF0000000) | (ID_EX.imm << 2);
-					CURRENT_STATE.REGS[31] = ID_EX.PC + 4;//THIS MIGHT BE WRONG
+					CURRENT_STATE.REGS[31] = ID_EX.PC + 4;
 					branch_jump = TRUE;
 					EX_MEM.Branch = 1;
-					print_instruction(EX_MEM.PC);
+					//print_instruction(EX_MEM.PC);
 				}
 				else printf("Execute flag error JAL\n");
 				break;
@@ -1844,7 +1840,6 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					ID_EX.imm = binInstruction & 0x0000FFFF;
 					ID_EX.RegisterRs = (binInstruction & 0x03E00000) >> 21;
 					ID_EX.RegisterRs = (binInstruction >> 21) & 0x1F;
-					printf("ID_EX.RegisterRs: %x\n",ID_EX.RegisterRs);
 					ID_EX.RegisterRd = 0;
 					ID_EX.RegisterRt = (binInstruction & 0x001F0000) >> 16;
 					ID_EX.A = CURRENT_STATE.REGS[ID_EX.RegisterRs];
@@ -1856,7 +1851,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					ID_EX.MemRead = 0;
 					ID_EX.MemWrite = 0;
 					ID_EX.MemToReg = 0;
-					printf("in beq id: ID_EX.RegisterRs = 0x%x,ID_EX.RegisterRt= 0x%x, IF_ID.IR = 0x%x\n", ID_EX.RegisterRs, ID_EX.RegisterRt, IF_ID.IR);
+					
 				}
 				else if(execute_flag == 1){
 						
@@ -1869,7 +1864,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 						EX_MEM.Branch = 0;
 						EX_MEM.ALUOutput = 0;
 					}
-					print_instruction(ID_EX.PC);
+					//print_instruction(ID_EX.PC);
 				}
 				else printf("Execute flag error BEQ\n");
 				break;
@@ -1900,18 +1895,18 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 						EX_MEM.Branch = 1;
 					}
 					else{ 
-						printf("branch not taken");
+						
 						EX_MEM.ALUOutput = 0;
 						EX_MEM.ALUOutput2 = 0;
 						EX_MEM.Branch = 0;
 					}
-					print_instruction(EX_MEM.PC);
+					//print_instruction(EX_MEM.PC);
 				}
 				else printf("Execute flag error BNE\n");
 				break;
 
 			case 0x06: //BLEZ
-			printf("in BLEZ\n\n");
+			
 				if (execute_flag == 0){
 						//ID_EX.imm = instruction & 0x0000FFFF;
 						ID_EX.imm = binInstruction & 0x0000FFFF;
@@ -1927,16 +1922,20 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 						ID_EX.MemRead = 0;
 						ID_EX.MemWrite = 0;
 						ID_EX.MemToReg = 0;
-					printf("\t\tIn ID: ID_EX.RegisterRs: 0x%x, ID_EX.A: 0x%x,ID_EX.imm:  0x%x\n", ID_EX.RegisterRs, ID_EX.A, ID_EX.imm); 
+					
 					}
 				else if(execute_flag == 1){
-					printf("\tIn EX: ID_EX.RegisterRs: 0x%x, ID_EX.A: 0x%x,ID_EX.imm:  0x%x\n", ID_EX.RegisterRs, ID_EX.A, ID_EX.imm); 
+					
 					if((ID_EX.A & 0x80000000) > 0 || ID_EX.A == 0){
 						EX_MEM.ALUOutput = ID_EX.PC +  ( (ID_EX.imm & 0x8000) > 0 ? (ID_EX.imm | 0xFFFF0000)<<2 : (ID_EX.imm & 0x0000FFFF)<<2);
 						branch_jump = TRUE;
 						EX_MEM.Branch = 1;
 					}
-					print_instruction(ID_EX.PC);	
+					else{
+						EX_MEM.Branch = 0;
+						EX_MEM.ALUOutput = 0;
+					}
+					//print_instruction(ID_EX.PC);	
 				}
 				else printf("Execute flag error BLEZ\n");
 				break;
@@ -1964,7 +1963,11 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 						branch_jump = TRUE;
 						EX_MEM.Branch = 1;
 					}
-					print_instruction(EX_MEM.PC);
+					else{
+						EX_MEM.Branch = 0;
+						EX_MEM.ALUOutput = 0;
+					}
+					//print_instruction(EX_MEM.PC);
 				}
 				else printf("Execute flag error BGTZ\n");
 				break;
@@ -2251,7 +2254,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 				ID_EX.B = CURRENT_STATE.REGS[base];
 				ID_EX.RegisterRd = 0;
 				ID_EX.RegisterRt = rt;
-				printf("base in ex SW: 0x%x, rt: %lx\n", CURRENT_STATE.REGS[base],rt);
+				
 				ID_EX.RegisterRs = 0;
 	        		ID_EX.RegWrite = 0;
 				ID_EX.ALUSrc = 1;
@@ -2260,13 +2263,13 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 				ID_EX.MemRead = 0;
 				ID_EX.MemWrite = 1;
 				ID_EX.MemToReg = 0;
-				printf("register Rt in ex SW: 0x%x\n", ID_EX.RegisterRt);
+				
 				//break;
 			}
 			else if (execute_flag == 1){
-			     	printf("register rt before execution: 0x%x\n", ID_EX.RegisterRt);
+			     
 			     	EX_MEM.ALUOutput = ID_EX.B + ( ( ID_EX.imm  & 0x8000) > 0 ? ( ID_EX.imm  | 0xFFFF0000) : ( ID_EX.imm  & 0x0000FFFF));
-				printf("alu op in sw execute: 0x%x \n", EX_MEM.ALUOutput);
+				
 					//mem_write_32(addr, ID_EX.A);
 	             }
             	else{ 
@@ -2352,7 +2355,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
                     ID_EX.imm = immediate;
                     //ID_EX.C = rt;
                     //ID_EX.instruction_type = 2;
-			printf("LUI IR: 0x%x, PC: 0x%x\n", IF_ID.IR, IF_ID.PC);
+			
                     ID_EX.rt = CURRENT_STATE.REGS[rt];
 					ID_EX.RegisterRd = 0;
 					ID_EX.RegisterRt = rt;
