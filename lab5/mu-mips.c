@@ -340,9 +340,8 @@ void WB()//TA told us to update current state not next state, but updating curre
 {
 	
 		printf("in wb: ");
-		print_instruction(MEM_WB.PC); 
+		print_instruction(MEM_WB.PC);
 	
-
 		if (MEM_WB.RegDst == 1 && MEM_WB.ALUOp == 0 && MEM_WB.ALUSrc == 1 && MEM_WB.MemRead == 1 && MEM_WB.MemWrite == 0 && MEM_WB.RegWrite == 1 && MEM_WB.MemToReg == 1) {//load
 				
 				CURRENT_STATE.REGS[MEM_WB.RegisterRt] = MEM_WB.LMD;
@@ -390,7 +389,7 @@ void WB()//TA told us to update current state not next state, but updating curre
 			//(CURRENT_STATE.PC);
 			}
 			else
-				printf("SYSCALL error\n");		
+				printf("SYSCALL error\n");
 		}
 	
 		INSTRUCTION_COUNT++;
@@ -403,52 +402,52 @@ void WB()//TA told us to update current state not next state, but updating curre
 void MEM()
 {
 		
-		printf("in mem: ");
-		print_instruction(EX_MEM.PC); 
-		
-		//load
-		
-			if ((EX_MEM.RegDst == 1) && (EX_MEM.ALUOp == 0) && (EX_MEM.ALUSrc == 1) && (EX_MEM.MemRead == 1) && (EX_MEM.MemWrite == 0) && (EX_MEM.RegWrite == 1) && (EX_MEM.MemToReg == 1))  {//load
-			
-			MEM_WB.LMD = mem_read_32(EX_MEM.ALUOutput);
-			
-			if (EX_MEM.WBH == 1){//LH
-				MEM_WB.LMD = ((MEM_WB.LMD & 0x0000FFFF) & 0x8000) > 0 ? (MEM_WB.LMD | 0xFFFF0000) : (MEM_WB.LMD & 0x0000FFFF);
-			}
-			else if (EX_MEM.WBH == 2){ //LB
-				MEM_WB.LMD = ((MEM_WB.LMD & 0x000000FF) & 0x80) > 0 ? (MEM_WB.LMD | 0xFFFFFF00) : (MEM_WB.LMD & 0x000000FF);
-			}
-		}
+	printf("in mem: ");
+	print_instruction(EX_MEM.PC); 
 	
-		if (EX_MEM.ALUOp == 0 && EX_MEM.ALUSrc == 1 && EX_MEM.MemRead == 0 && EX_MEM.MemWrite == 1 && EX_MEM.RegWrite == 0){//store
-			printf("\nwriting 0x%x, to 0x%0x\n\n", EX_MEM.A, EX_MEM.ALUOutput);
-			mem_write_32(EX_MEM.ALUOutput, EX_MEM.A);
-		}
-
-		MEM_WB.ALUOutput = EX_MEM.ALUOutput;
-		MEM_WB.ALUOutput2 = EX_MEM.ALUOutput2;
-		MEM_WB.A = EX_MEM.A;
-		MEM_WB.B = EX_MEM.B;
-		//MEM_WB.C = EX_MEM.C;
-		MEM_WB.PC = EX_MEM.PC;	
-		MEM_WB.IR = EX_MEM.IR;
-		MEM_WB.RegWrite = EX_MEM.RegWrite;
-		MEM_WB.ALUSrc = EX_MEM.ALUSrc;
-		MEM_WB.RegDst = EX_MEM.RegDst;
-		MEM_WB.ALUOp = EX_MEM.ALUOp;
-		MEM_WB.MemRead = EX_MEM.MemRead;
-		MEM_WB.MemWrite = EX_MEM.MemWrite;
-		MEM_WB.MemToReg = EX_MEM.MemToReg;
-		MEM_WB.WBH = EX_MEM.WBH;
-		MEM_WB.RegisterRs = EX_MEM.RegisterRs;
-		MEM_WB.RegisterRt = EX_MEM.RegisterRt;
-		MEM_WB.RegisterRd = EX_MEM.RegisterRd;
-		MEM_WB.rt = EX_MEM.rt;
-		MEM_WB.rd = EX_MEM.rd;
-		MEM_WB.instruction_type = EX_MEM.instruction_type;
-		MEM_WB.Branch = EX_MEM.Branch;
+	//load
+	
+	if ((EX_MEM.RegDst == 1) && (EX_MEM.ALUOp == 0) && (EX_MEM.ALUSrc == 1) && (EX_MEM.MemRead == 1) && (EX_MEM.MemWrite == 0) && (EX_MEM.RegWrite == 1) && (EX_MEM.MemToReg == 1))  {//load
+	
+		MEM_WB.LMD = mem_read_32(EX_MEM.ALUOutput);
 		
+		if (EX_MEM.WBH == 1){//LH
+			MEM_WB.LMD = ((MEM_WB.LMD & 0x0000FFFF) & 0x8000) > 0 ? (MEM_WB.LMD | 0xFFFF0000) : (MEM_WB.LMD & 0x0000FFFF);
+		}
+		else if (EX_MEM.WBH == 2){ //LB
+			MEM_WB.LMD = ((MEM_WB.LMD & 0x000000FF) & 0x80) > 0 ? (MEM_WB.LMD | 0xFFFFFF00) : (MEM_WB.LMD & 0x000000FF);
+		}
 	}
+
+	if (EX_MEM.ALUOp == 0 && EX_MEM.ALUSrc == 1 && EX_MEM.MemRead == 0 && EX_MEM.MemWrite == 1 && EX_MEM.RegWrite == 0){//store
+		printf("\nwriting 0x%x, to 0x%0x\n\n", EX_MEM.A, EX_MEM.ALUOutput);
+		mem_write_32(EX_MEM.ALUOutput, EX_MEM.A);
+	}
+
+	MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+	MEM_WB.ALUOutput2 = EX_MEM.ALUOutput2;
+	MEM_WB.A = EX_MEM.A;
+	MEM_WB.B = EX_MEM.B;
+	//MEM_WB.C = EX_MEM.C;
+	MEM_WB.PC = EX_MEM.PC;	
+	MEM_WB.IR = EX_MEM.IR;
+	MEM_WB.RegWrite = EX_MEM.RegWrite;
+	MEM_WB.ALUSrc = EX_MEM.ALUSrc;
+	MEM_WB.RegDst = EX_MEM.RegDst;
+	MEM_WB.ALUOp = EX_MEM.ALUOp;
+	MEM_WB.MemRead = EX_MEM.MemRead;
+	MEM_WB.MemWrite = EX_MEM.MemWrite;
+	MEM_WB.MemToReg = EX_MEM.MemToReg;
+	MEM_WB.WBH = EX_MEM.WBH;
+	MEM_WB.RegisterRs = EX_MEM.RegisterRs;
+	MEM_WB.RegisterRt = EX_MEM.RegisterRt;
+	MEM_WB.RegisterRd = EX_MEM.RegisterRd;
+	MEM_WB.rt = EX_MEM.rt;
+	MEM_WB.rd = EX_MEM.rd;
+	MEM_WB.instruction_type = EX_MEM.instruction_type;
+	MEM_WB.Branch = EX_MEM.Branch;
+		
+}
 
 /************************************************************/
 /* execution (EX) pipeline stage:                           */ 
@@ -498,10 +497,12 @@ void ID()
 	
 		printf("in id: ");
 		print_instruction(IF_ID.PC); 
+		printf("ID_EX.RegisterRt: %x, EX_MEM.RegisterRt: %x\n",ID_EX.RegisterRt, EX_MEM.RegisterRt);
 	
 	if(stall == 0){
 		/*IMPLEMENT THIS*/
 		execute_instruction(IF_ID.IR, 0);
+		printf("ID_EX.RegisterRt: %x, EX_MEM.RegisterRt: %x\n",ID_EX.RegisterRt, EX_MEM.RegisterRt);
 		/*if(ENABLE_FORWARDING){
 				if(EX_MEM.RegDst == 0){//rd is destination
 					if((EX_MEM.RegWrite == 1 && (EX_MEM.RegisterRd != 0)) && (EX_MEM.RegisterRd == ID_EX.RegisterRs)){
@@ -620,7 +621,7 @@ void ID()
 					stall = 2;
 				}
 			}
-			else if (EX_MEM.RegDst == 0){
+			else if (MEM_WB.RegDst == 0){
 				if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRd != 0)) && (MEM_WB.RegisterRd == ID_EX.RegisterRs)){
 				    //stall
 			
@@ -631,41 +632,38 @@ void ID()
 				
 					stall = 1;
 				}
-			
 			}
 			else if (EX_MEM.RegDst == 1){//rt destination 
 				printf("EX_MEM.RegisterRt: 0x%x, ID_EX.RegisterRs 0x%x, ID_EX.RegisterRt 0x%x\n", EX_MEM.RegisterRt, ID_EX.RegisterRs, ID_EX.RegisterRt);
 				if(((EX_MEM.RegWrite == 1) && (EX_MEM.RegisterRt != 0)) && (EX_MEM.RegisterRt == ID_EX.RegisterRs)){
-					   
+					printf("stall 2x\n");
 					stall = 2;
-					    
-					}
+				
+				}
 				if(((EX_MEM.RegWrite == 1) && (EX_MEM.RegisterRt != 0)) && (EX_MEM.RegisterRt == ID_EX.RegisterRt)){
-					    
+					printf("---------stalling twice\n");
 					stall = 2;
 					    
-					}
+				}
 			}
 			else if (MEM_WB.RegDst == 1){
 				if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRt != 0)) && (MEM_WB.RegisterRt == ID_EX.RegisterRs)){
 					    //stall
-				
+					printf("stall 1x\n");
 					stall = 1;
 					}
 				if(((MEM_WB.RegWrite == 1) && (MEM_WB.RegisterRt != 0)) && (MEM_WB.RegisterRt == ID_EX.RegisterRt)){
 					    //stall
-				
+					printf("----------Stalling once\n");
 					stall = 1;
 				}	
+
 				
 			//if (ID_EX.ALUOp == 0 && ID_EX.ALUSrc == 1 && ID_EX.MemRead == 0 && EX_MEM.MemWrite == 1 && EX_MEM.RegWrite == 0 && ){//checking to make sure we aren't storing a value that isn't in reg yet
 					//if (EX_MEM.RegisterRt == ID_EX.RegisterRt){
 					//	stall = 2;
-			
 			}
-			
 		}	
-		
     }
     
 	if (stall == 0){
@@ -700,9 +698,7 @@ void ID()
 	}//not sure what to do yet
 	if (branch_jump){
 	}
-	
 }
-
 
 /************************************************************/
 /* instruction fetch (IF) pipeline stage:                                                              */ 
@@ -766,7 +762,6 @@ void print_program(){
 		printf("[0x%x]\t", addr);
 		print_instruction(addr);
 	}
-	
 }
 
 /***************************************MEM*********************/
@@ -2132,21 +2127,20 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 				
 			if (execute_flag == 0){
 					
-			        offset =  binInstruction & 0x0FFFF; 
-			        binInstruction = binInstruction >> 16;
-			        rt = binInstruction & 0x001F;
-			        binInstruction = binInstruction >> 5;
-			        base = binInstruction & 0x001F;
-			        ID_EX.imm = offset;
-			
-			        ID_EX.A = CURRENT_STATE.REGS[rt]; 
-			        ID_EX.B = CURRENT_STATE.REGS[base];
-			        ID_EX.RegisterRd = 0;
+		        offset =  binInstruction & 0x0FFFF; 
+		        binInstruction = binInstruction >> 16;
+		        rt = binInstruction & 0x001F;
+		        binInstruction = binInstruction >> 5;
+		        base = binInstruction & 0x001F;
+		        ID_EX.imm = offset;
+		
+		        ID_EX.A = CURRENT_STATE.REGS[rt]; 
+		        ID_EX.B = CURRENT_STATE.REGS[base];
+		        ID_EX.RegisterRd = 0;
 				ID_EX.RegisterRt = rt;
-				printf("base in ex SW: 0x%x\n", CURRENT_STATE.REGS[base]);
+				printf("base in ex SW: 0x%x, rt: %lx\n", CURRENT_STATE.REGS[base],rt);
 				ID_EX.RegisterRs = 0;
-
-	        		ID_EX.RegWrite = 0;
+	        	ID_EX.RegWrite = 0;
 				ID_EX.ALUSrc = 1;
 				ID_EX.RegDst = 0;
 				ID_EX.ALUOp = 0;
@@ -2250,7 +2244,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
 					ID_EX.RegWrite = 1;
 					ID_EX.ALUSrc = 0;
 					ID_EX.RegDst = 1;
-					ID_EX.ALUOp = 1;
+					ID_EX.ALUOp = 0;
 					ID_EX.MemRead = 0;
 					ID_EX.MemWrite = 0;
 					ID_EX.MemToReg = 0;
@@ -2259,7 +2253,7 @@ void execute_instruction(uint32_t instruction, int execute_flag){
                 	EX_MEM.ALUOutput = ID_EX.imm << 16;
 					//print_instruction(CURRENT_STATE.PC);
                 }
-                else printf("execute flag error LIU\n");
+                else printf("execute flag error LUI\n");
               break; 
                 default:
                     //printf("default on left hit\n");
