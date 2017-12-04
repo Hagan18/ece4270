@@ -102,7 +102,8 @@ int FORWARD_FLAG_A = 0;// 1 means a forward is coming from mem stage 10 means fr
 int FORWARD_FLAG_B = 0;// 1 means a forward is coming from mem stage 10 means from ex stage
 int stall = 0; //0 means no stall, anything above that there is a stall]
 int stallNum = 0;
-
+int numLoad;
+int numStore;
 /***************************************************************/
 /* Function Declerations.                                                                                                */
 /***************************************************************/

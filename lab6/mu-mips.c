@@ -399,7 +399,10 @@ void WB()//TA told us to update current state not next state, but updating curre
 		//syscall
 		if (MEM_WB.instruction_type == 1){
 			if(MEM_WB.A == 0xa){
-			RUN_FLAG = FALSE;
+				printf("Number of cycles to complete: %d\n", INSTRUCTION_COUNT);
+				printf("Cache Miss Rate: %f%%\n",((float)cache_misses/(float)INSTRUCTION_COUNT)*100.0);
+			
+				RUN_FLAG = FALSE;
 			//(CURRENT_STATE.PC);
 			}
 			
@@ -426,28 +429,26 @@ void MEM()
 		int i;
 		
 		word_offset = (EX_MEM.ALUOutput >> 2) & 0x03;
-		index = (EX_MEM.ALUOutput >> 4) & 0x0F;
-		tag = (EX_MEM.ALUOutput >> 8) & 0x0FFFFF;
+		index = (EX_MEM.ALUOutput >> 6) & 0x0F;
+		tag = (EX_MEM.ALUOutput >> 8);
 		
 		
 		
 	//load
 	
 	if ((EX_MEM.RegDst == 1) && (EX_MEM.ALUOp == 0) && (EX_MEM.ALUSrc == 1) && (EX_MEM.MemRead == 1) && (EX_MEM.MemWrite == 0) && (EX_MEM.RegWrite == 1) && (EX_MEM.MemToReg == 1))  {//load
-		//printf("\ninside load\n");
-		numLoad++;
 
-		printf("num load instuctions %d\n", numLoad);
-		printf("tag: %d, block[%d].tag = 0x%x\n", tag,index, L1Cache.blocks[index].tag);
+		numLoad++;
+		
 		if ((L1Cache.blocks[index].tag == tag) && (L1Cache.blocks[index].valid == 1)){//hit
 			MEM_WB.LMD = L1Cache.blocks[index].words[word_offset];
 			cache_hits += 1;
-			printf("\nload hit\n");
+			
 		}
 		else{
 			for (i = 0; i < WORD_PER_BLOCK; i++){//read a whole block in from memory
 				address  = (tag << 8) | (index << 4)|(i*4);
-				printf("address: 0x%x\n", address);
+				
 				L1Cache.blocks[index].words[i] = mem_read_32(address);
 				
 			}
@@ -469,24 +470,24 @@ void MEM()
 	}
 
 	if (EX_MEM.ALUOp == 0 && EX_MEM.ALUSrc == 1 && EX_MEM.MemRead == 0 && EX_MEM.MemWrite == 1 && EX_MEM.RegWrite == 0){//store
-		printf("\nin store\n");
+		
 		numStore++;
-		printf("num store instuctions %d\n", numStore);
-//printf("tag: %d, block[%d].tag = 0x%x\n", tag,index, L1Cache.blocks[index].tag);
+		
 		if (L1Cache.blocks[index].tag == tag && L1Cache.blocks[index].valid == 1 ){//hit
-			printf("inside store hit\n");
+			
 			L1Cache.blocks[index].words[word_offset] = EX_MEM.A;
 			
 			write_buffer[word_offset] = L1Cache.blocks[index].words[word_offset];
 			cache_hits += 1;
 		}
 		else{
-			printf("\ninside store miss\n");
+			
 			for (i = 0; i < WORD_PER_BLOCK; i++){//read a whole block in from memory
 				address  = (tag << 8) | (index << 4)|(i*4);
-				printf("address: 0x%x\n", address);
+				
 				L1Cache.blocks[index].words[i] = mem_read_32(address);
 				write_buffer[i] = L1Cache.blocks[index].words[i];
+				
 			}
 			
 			L1Cache.blocks[index].words[word_offset] = EX_MEM.A;
@@ -506,7 +507,7 @@ void MEM()
 	// 	}
 	// }
 	 
-	//if cache miss on load/store  takes 100 cycles
+	
 	
 	MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 	MEM_WB.ALUOutput2 = EX_MEM.ALUOutput2;
